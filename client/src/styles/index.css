@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- Base ---------------------------------------------------- */
+body {
+  @apply bg-gray-900 text-gray-100 font-mono;
+  margin: 0;
+}
+
+/* ---- Cell Styles --------------------------------------------- */
+.cell {
+  @apply w-10 h-10 border border-gray-600 flex items-center justify-center
+         text-sm font-bold cursor-default select-none transition-colors duration-150;
+}
+
+.cell.empty {
+  @apply bg-gray-800 hover:bg-gray-700;
+}
+
+.cell.ship {
+  @apply bg-blue-600 border-blue-400;
+}
+
+.cell.hit {
+  @apply bg-red-600 border-red-400 text-white;
+}
+
+.cell.miss {
+  @apply bg-gray-600 text-gray-400;
+}
+
+.cell.sunk {
+  @apply bg-red-900 border-red-500 text-white line-through;
+}
+
+/* Tracking board clickable cells */
+.cell.shootable {
+  @apply cursor-crosshair hover:bg-gray-600;
+}
+
+.cell.shootable.empty:not(.hit):not(.miss):not(.sunk):hover {
+  @apply bg-gray-600 ring-1 ring-yellow-400;
+}
+
+/* Placement board drop zones */
+.cell.drop-target {
+  @apply cursor-pointer;
+}
+
+.cell.drop-target.empty:hover {
+  @apply bg-blue-800 ring-1 ring-blue-400;
+}
+
+.cell.drag-over {
+  @apply bg-blue-700 ring-2 ring-yellow-400;
+}
+
+.cell.placing-preview {
+  @apply bg-blue-600 opacity-50;
+}
+
+/* ---- Ship Palette -------------------------------------------- */
+.ship-palette-item {
+  @apply flex items-center gap-1 p-2 rounded cursor-grab bg-blue-800
+         hover:bg-blue-700 active:cursor-grabbing transition-colors;
+}
+
+.ship-palette-item.placed {
+  @apply opacity-40 cursor-not-allowed bg-gray-700;
+}
+
+.ship-segment {
+  @apply w-8 h-8 border border-blue-400 bg-blue-600 rounded-sm;
+}
+
+/* ---- Turn Indicator ------------------------------------------ */
+.turn-indicator {
+  @apply px-4 py-2 rounded-lg text-lg font-bold text-center;
+}
+
+.turn-indicator.my-turn {
+  @apply bg-green-700 text-white animate-pulse;
+}
+
+.turn-indicator.opponent-turn {
+  @apply bg-gray-700 text-gray-300;
+}
+
+/* ---- Game Over Modal ----------------------------------------- */
+.game-over-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50;
+}
+
+.game-over-modal {
+  @apply bg-gray-800 rounded-xl p-8 max-w-md w-full text-center shadow-2xl border border-gray-600;
+}
+
+/* ---- Board Layout -------------------------------------------- */
+.board-container {
+  @apply flex flex-col items-center gap-2;
+}
+
+.board-label {
+  @apply text-sm text-gray-400 font-semibold uppercase tracking-wider;
+}
+
+.board-coordinates-row {
+  @apply flex;
+}
+
+.board-coordinate-label {
+  @apply w-10 h-6 flex items-center justify-center text-xs text-gray-500;
+}
+
+.board-row {
+  @apply flex;
+}
+
+.row-label {
+  @apply w-6 h-10 flex items-center justify-center text-xs text-gray-500;
+}
+
+/* ---- Ship on Own Board during Battle ------------------------- */
+.cell.ship-revealed {
+  @apply bg-blue-700 border-blue-500;
+}
+
+/* ---- Action Buttons ------------------------------------------ */
+.btn {
+  @apply px-4 py-2 rounded font-semibold transition-colors duration-150
+         disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-500 text-white;
+}
+
+.btn-danger {
+  @apply bg-red-600 hover:bg-red-500 text-white;
+}
+
+.btn-success {
+  @apply bg-green-600 hover:bg-green-500 text-white;
+}
+
+.btn-secondary {
+  @apply bg-gray-600 hover:bg-gray-500 text-white;
+}
+
+/* ---- Input --------------------------------------------------- */
+.input {
+  @apply bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-100
+         focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono uppercase;
+}
+
+/* ---- Key Hint ------------------------------------------------ */
+.key-hint {
+  @apply text-xs text-gray-500 mt-1;
+}
+
+/* ---- Placement ships list ------------------------------------ */
+.placed-ship {
+  @apply flex items-center gap-2 px-3 py-1 rounded bg-gray-700 text-sm;
+}
+
+.placed-ship.ready {
+  @apply bg-green-800;
+}
