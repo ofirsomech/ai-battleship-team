@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.server/node_modules/
+client/node_modules/
+
+.env
+# Build output
+client/dist/
+server/dist/
+
+# Environment variables (keep .env for demo, but exclude secrets)
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+
+# Database
+*.sqlite
+*.db
+
+# Temporary files
+tmp/
+temp/
+
+# Personal notes — never submitted to graders
+hebrew/
+english/
