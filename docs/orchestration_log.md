@@ -11,3 +11,8 @@
 | 2026-05-16T19:50:00Z | Phase 2A | db-dev | feature/db-domain | spawn | COMPLETED |
 | 2026-05-16T20:10:00Z | Phase 2A | db-reviewer | feature/db-domain | review | APPROVE |
 | 2026-05-16T20:11:57Z | Phase 2A | orchestrator | feature/db-domain → dev | merge | OK |
+| 2026-05-16T20:38:00Z | Phase 2B | server-dev | feature/server-socket | spawn | COMPLETED |
+| 2026-05-16T20:47:00Z | Phase 2B | server-reviewer | feature/server-socket | review | REJECT (Cycle 0) |
+| 2026-05-16T20:54:00Z | Phase 2B | server-dev | feature/server-socket | fix (Cycle 1) | COMPLETED |
+| 2026-05-16T20:59:00Z | Phase 2B | server-reviewer | feature/server-socket | review | APPROVE (Cycle 1) |
+| 2026-05-16T21:00:28Z | Phase 2B | orchestrator | feature/server-socket → dev | merge | OK |
