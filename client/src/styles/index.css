@@ -2,10 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ================================================================
+   Theme Tokens — Navy / Battleship color palette
+   ================================================================ */
+
+:root {
+  --color-navy-900: #0f172a;
+  --color-navy-800: #1e293b;
+  --color-navy-700: #334155;
+  --color-navy-600: #475569;
+
+  --color-grid-bg: #1e293b;
+  --color-grid-border: #475569;
+  --color-cell-empty: #1e293b;
+  --color-cell-hover: #334155;
+  --color-ship-blue: #2563eb;
+  --color-ship-border: #60a5fa;
+  --color-hit-red: #dc2626;
+  --color-hit-border: #f87171;
+  --color-sunk-bg: #7f1d1d;
+  --color-sunk-border: #ef4444;
+  --color-miss-bg: #4b5563;
+
+  --color-success: #16a34a;
+  --color-warning: #ca8a04;
+  --color-danger: #dc2626;
+  --color-info: #2563eb;
+}
+
 /* ---- Base ---------------------------------------------------- */
 body {
   @apply bg-gray-900 text-gray-100 font-mono;
   margin: 0;
+}
+
+/* ================================================================
+   Keyframe Animations
+   ================================================================ */
+
+/* Pulse animation for hit cells — subtle red glow */
+@keyframes pulse-hit {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 6px 2px rgba(220, 38, 38, 0.3);
+  }
+}
+
+/* Sunk reveal animation — border highlight sweep */
+@keyframes sunk-reveal {
+  0% {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+  50% {
+    border-color: #fca5a5;
+    box-shadow: 0 0 8px 2px rgba(239, 68, 68, 0.4);
+  }
+  100% {
+    border-color: #ef4444;
+    box-shadow: 0 0 4px 1px rgba(239, 68, 68, 0.2);
+  }
 }
 
 /* ---- Cell Styles --------------------------------------------- */
@@ -22,21 +81,25 @@ body {
   @apply bg-blue-600 border-blue-400;
 }
 
+/* Hit: red bg + pulse animation */
 .cell.hit {
   @apply bg-red-600 border-red-400 text-white;
+  animation: pulse-hit 1.2s ease-in-out infinite;
 }
 
 .cell.miss {
   @apply bg-gray-600 text-gray-400;
 }
 
+/* Sunk: dark red bg, distinct border + crossed-out V + sunk-reveal animation */
 .cell.sunk {
-  @apply bg-red-900 border-red-500 text-white line-through;
+  @apply bg-red-950 border-red-500 text-white line-through;
+  animation: sunk-reveal 1.5s ease-in-out infinite;
 }
 
 /* Tracking board clickable cells */
 .cell.shootable {
-  @apply cursor-crosshair hover:bg-gray-600;
+  @apply cursor-crosshair;
 }
 
 .cell.shootable.empty:not(.hit):not(.miss):not(.sunk):hover {
@@ -76,7 +139,7 @@ body {
 
 /* ---- Turn Indicator ------------------------------------------ */
 .turn-indicator {
-  @apply px-4 py-2 rounded-lg text-lg font-bold text-center;
+  @apply px-4 py-2 rounded-lg text-lg font-bold text-center transition-colors duration-300;
 }
 
 .turn-indicator.my-turn {
@@ -109,14 +172,16 @@ body {
   @apply flex;
 }
 
+/* Coordinate labels: a-j columns, centered over each cell */
 .board-coordinate-label {
-  @apply w-10 h-6 flex items-center justify-center text-xs text-gray-500;
+  @apply w-10 h-6 flex items-center justify-center text-xs text-gray-500 uppercase;
 }
 
 .board-row {
   @apply flex;
 }
 
+/* Row labels: 1-10, aligned to the left of each row */
 .row-label {
   @apply w-6 h-10 flex items-center justify-center text-xs text-gray-500;
 }
@@ -126,7 +191,7 @@ body {
   @apply bg-blue-700 border-blue-500;
 }
 
-/* ---- Action Buttons ------------------------------------------ */
+/* ---- Action Buttons (utility classes for non-UI-component usage) ---- */
 .btn {
   @apply px-4 py-2 rounded font-semibold transition-colors duration-150
          disabled:opacity-50 disabled:cursor-not-allowed;
