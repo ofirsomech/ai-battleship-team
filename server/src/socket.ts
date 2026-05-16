@@ -10,6 +10,7 @@ import type {
   ServerToClientEvents,
   ShipPlacement,
   Ship,
+  ShipType,
   Player,
 } from "@battleship/shared";
 import { SHIP_LENGTHS } from "@battleship/shared";
@@ -77,7 +78,7 @@ function validateAndPlaceAllShips(
   }
 
   // 2. All ship types must be unique and present
-  const requiredTypes = new Set(Object.keys(SHIP_LENGTHS));
+  const requiredTypes = new Set(Object.keys(SHIP_LENGTHS) as ShipType[]);
   const providedTypes = new Set(placements.map((p) => p.shipType));
   if (requiredTypes.size !== providedTypes.size) {
     return { success: false, error: "Must place all 5 unique ship types" };
