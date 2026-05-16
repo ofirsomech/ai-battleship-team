@@ -43,6 +43,8 @@ const App: React.FC = () => {
   const socketRef = useRef<TypedSocket | null>(null);
   const [playAgainRequested, setPlayAgainRequested] = useState(false);
   const mountedRef = useRef(true);
+  const phaseRef = useRef(state.phase);
+  phaseRef.current = state.phase; // keep ref in sync with state
 
   // ---- Socket lifecycle ---------------------------------------
   useEffect(() => {
@@ -153,7 +155,7 @@ const App: React.FC = () => {
       if (!mountedRef.current) return;
       dispatch({ type: "SET_NOTICE", notice: data.message });
       // If opponent disconnected during placement/lobby → back to lobby
-      if (state.phase === "placement") {
+      if (phaseRef.current === "placement") {
         dispatch({ type: "SET_PHASE", phase: "lobby" });
       }
     });

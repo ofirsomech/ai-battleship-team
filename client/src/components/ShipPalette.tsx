@@ -63,11 +63,7 @@ const ShipPalette: React.FC<ShipPaletteProps> = ({
             >
               <span className="text-xs font-bold w-24">{shipType}</span>
               <div
-                className="flex gap-1"
-                style={{
-                  flexDirection:
-                    currentOrientation === "horizontal" ? "row" : "column",
-                }}
+                className={`flex gap-1 ${currentOrientation === "vertical" ? "flex-col" : ""}`}
               >
                 {Array.from({ length }, (_, i) => (
                   <div key={i} className="ship-segment" />
