@@ -14,7 +14,7 @@
 - `server/src/socket.ts`
 
 ## Notes
-All 8 client→server Socket.IO events from `docs/api_contract.md` are wired with full input validation, domain delegation, and proper typed emits. Disconnect handling follows `game_spec.md` §8: immediate drop during lobby/placement, 30s grace window during battle with forfeit on expiry. Room state machine (lobby → placement → battle → gameOver → placement) enforced via phase guards. Host (`players[0]`) shoots first per §5. `randomizeShips` and `playAgain` use Socket.IO acknowledgement callbacks for client notification. No business logic in handlers — all game logic delegated to `domain/board.ts` and `domain/match.ts`. Manual smoke test confirmed: createRoom → joinRoom → placeShips → playerReady → battleStart flow works end-to-end.
+All 8 client→server Socket.IO events from `docs/api_contract.md` are wired with full input validation, domain delegation, and proper typed emits. Disconnect handling follows `game_spec.md` §8: immediate drop during lobby/placement, 30s grace window during battle with forfeit on expiry. **Cycle 1 fix**: added `ShipType` to type-only import and cast `Object.keys(SHIP_LENGTHS) as ShipType[]` on line 80 of `socket.ts` to resolve TS2345. `tsc --noEmit` now passes with zero errors. 57 domain tests still green.
 
 ---
-*Logged: 2026-05-16T20:38:00Z*
+*Logged: 2026-05-16T20:54:00Z*
