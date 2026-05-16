@@ -330,20 +330,24 @@
 
 ---
 
-## AC Traceability Matrix
+## Traceability Matrix
 
-| AC | Title | Scenario IDs |
-|----|-------|--------------|
-| AC-1 | Create Room CTA + 6-char code | 1.1, 1.2, 13.1 |
-| AC-2 | Join room by code | 2.1, 2.2, 2.3, 13.1 |
-| AC-3 | Drag-and-drop placement with rotation | 3.1, 3.2, 3.3, 13.1 |
-| AC-4 | Randomize button → valid fleet | 4.1, 4.2, 13.1 |
-| AC-5 | Placement validation (overlap, bounds) | 5.1, 5.2, 5.3, 5.4, 13.1 |
-| AC-6 | Battle starts on both Ready | 6.1, 6.2, 13.1 |
-| AC-7 | Turn indicator | 7.1, 7.2, 8.4, 13.1 |
-| AC-8 | Shot updates both clients < 500ms | 8.1, 8.2, 8.3, 13.1 |
-| AC-9 | Hit V, miss x, sunk highlight | 8.1, 8.2, 8.3, 13.1 |
-| AC-10 | Re-shoot rejection | 9.1, 9.2, 9.3, 13.1 |
-| AC-11 | gameOver event + board reveal | 10.1, 10.2, 13.1 |
-| AC-12 | Disconnect / 30s reconnect | 11.1, 11.2, 11.3 |
-| AC-13 | Play Again → fresh Placement | 12.1, 12.2, 13.1 |
+> Verified by Coverage Validator AI on `feature/qa-plan`.
+> Every AC (1–13) from [`docs/game_spec.md`](../docs/game_spec.md) §10 maps to ≥1 e2e scenario ID **and** ≥1 Antigravity visual-test section.
+> Antigravity manual checklist reference: [`docs/antigravity_visual_tests.md`](../docs/antigravity_visual_tests.md).
+
+| AC | Title | Scenario IDs | Antigravity |
+|----|-------|--------------|-------------|
+| AC-1 | Create Room CTA + 6-char code | 1.1, 1.2, 13.1 | §1 Lobby UI |
+| AC-2 | Join room by code | 2.1, 2.2, 2.3, 13.1 | §1 Lobby UI |
+| AC-3 | Drag-and-drop placement with rotation | 3.1, 3.2, 3.3, 13.1 | §2 Board Layout, §3 Ship Palette |
+| AC-4 | Randomize button → valid fleet | 4.1, 4.2, 13.1 | §3 Ship Palette |
+| AC-5 | Placement validation (overlap, bounds) | 5.1, 5.2, 5.3, 5.4, 13.1 | §3 Ship Palette |
+| AC-6 | Battle starts on both Ready | 6.1, 6.2, 13.1 | — (behavioral, no dedicated visual section) |
+| AC-7 | Turn indicator | 7.1, 7.2, 8.4, 13.1 | §6 Turn Indicator |
+| AC-8 | Shot updates both clients < 500ms | 8.1, 8.2, 8.3, 13.1 | §2 Board Layout, §4 Own Board, §5 Tracking Board |
+| AC-9 | Hit V, miss x, sunk highlight | 8.1, 8.2, 8.3, 13.1 | §4 Own Board, §5 Tracking Board |
+| AC-10 | Re-shoot rejection | 9.1, 9.2, 9.3, 13.1 | §5 Tracking Board |
+| AC-11 | gameOver event + board reveal | 10.1, 10.2, 13.1 | §7 Game Over Modal |
+| AC-12 | Disconnect / 30s reconnect | 11.1, 11.2, 11.3 | §8 Disconnect Timer Display |
+| AC-13 | Play Again → fresh Placement | 12.1, 12.2, 13.1 | §7 Game Over Modal |
