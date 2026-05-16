@@ -22,3 +22,7 @@
 2026-05-16T21:56:00Z | Phase 2C | client-reviewer | feature/client-app | review | REJECT (Cycle 0) |
 2026-05-16T22:00:00Z | Phase 2C | client-dev | feature/client-app | fix (Cycle 1) | COMPLETED |
 2026-05-16T22:10:00Z | Phase 2C | client-reviewer | feature/client-app | review | APPROVE (Cycle 1) |
+2026-05-16T22:12:00Z | Phase 2C | orchestrator | feature/client-app → dev | merge | OK |
+2026-05-16T22:24:00Z | Phase 2 (Review) | requirements-reviewer | dev | review | AC_COV |
+2026-05-16T22:43:00Z | Phase 3 | qa-planner | feature/qa-plan | spawn | COMPLETED |
+2026-05-16T22:50:00Z | Phase 3 | coverage-validator | feature/qa-plan | spawn | COMPLETED |
