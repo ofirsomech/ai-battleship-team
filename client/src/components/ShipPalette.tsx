@@ -29,12 +29,12 @@ const ShipPalette: React.FC<ShipPaletteProps> = ({
 }) => {
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
           Ships to Place
         </h3>
         <button
-          className="btn btn-secondary text-xs px-2 py-1"
+          className="btn btn-secondary text-xs px-3 py-2 min-h-[44px] w-full sm:w-auto"
           onClick={onRotate}
         >
           Rotate (R) — {currentOrientation === "horizontal" ? "→" : "↓"}

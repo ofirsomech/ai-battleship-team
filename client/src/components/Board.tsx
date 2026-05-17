@@ -51,7 +51,7 @@ const Board: React.FC<BoardProps> = ({
 
       {/* Column headers */}
       <div className="board-coordinates-row">
-        <div className="w-6" /> {/* spacer for row labels */}
+        <div className="w-5 sm:w-6" /> {/* spacer for row labels */}
         {COL_LABELS.map((col) => (
           <div key={col} className="board-coordinate-label">
             {col}
