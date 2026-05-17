@@ -34,3 +34,6 @@
 2026-05-17T04:51:00Z | Phase 3 | template-reviewer | feature/client-app-styles | review | APPROVE |
 2026-05-17T04:51:00Z | Phase 3 | qa-impl-reviewer | feature/qa-impl-playwright | review | APPROVE |
 2026-05-17T04:51:00Z | Phase 3 | negative-qa-reviewer | feature/qa-negative | review | APPROVE |
+2026-05-17T05:00:00Z | Phase 5 | bug-squasher | fix/ship-placement-state | spawn | COMPLETED |
+2026-05-17T05:01:00Z | Phase 5 | orchestrator | fix/ship-placement-state → dev | merge | OK |
+2026-05-17T05:30:00Z | Phase 4 | human | dev | antigravity-manual-pass | PASS (59/59) |
