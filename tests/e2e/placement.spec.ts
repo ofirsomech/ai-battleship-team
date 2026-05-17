@@ -298,6 +298,64 @@ test.describe("Placement — Validation (Scenarios 5.1-5.4)", () => {
     await p1Ctx.close();
     await p2Ctx.close();
   });
+
+  test("selecting a new ship does not affect already placed ships", async ({ browser }) => {
+    const p1Ctx = await browser.newContext();
+    const p2Ctx = await browser.newContext();
+    const p1 = await p1Ctx.newPage();
+    const p2 = await p2Ctx.newPage();
+
+    // Setup
+    await p1.goto("/");
+    await p2.goto("/");
+    await p1.waitForSelector("text=Create Room", { timeout: 10_000 });
+    await p2.waitForSelector("text=Create Room", { timeout: 10_000 });
+
+    await p1.click("button:has-text('Create Room')");
+    await p1.waitForSelector("text=Room Code", { timeout: 10_000 });
+    const roomCode = (await p1.locator(".text-4xl.font-bold.tracking-\\[0\\.5em\\].text-blue-400").textContent())?.trim() ?? "";
+
+    await p2.fill('input[placeholder="Room Code"]', roomCode);
+    await p2.click("button:has-text('Join Room')");
+    await p1.waitForSelector("text=Place Your Fleet", { timeout: 10_000 });
+
+    // Select Submarine from palette and place it at c5 (horizontal, 3 cells: c5-c7)
+    // Click Submarine in palette to select it
+    await p1.locator(".ship-palette-item:has-text('Submarine')").click();
+    await p1.waitForTimeout(200);
+
+    // Click cell c5 on the board to place Submarine
+    const boardC5 = p1.locator(".board-label:text('Your Board')").locator("..").locator('[title="c5"]');
+    await boardC5.click();
+    await p1.waitForTimeout(300);
+
+    // Verify Submarine appears at c5, c6, c7
+    for (const coord of ["c5", "c6", "c7"]) {
+      const cell = p1.locator(".board-label:text('Your Board')").locator("..").locator(`[title="${coord}"]`);
+      const className = await cell.getAttribute("class");
+      expect(className).toContain("ship");
+    }
+
+    // Verify ship counter shows 1/5
+    await expect(p1.locator("button:has-text('Place all ships (1/5)')")).toBeVisible({ timeout: 3_000 });
+
+    // Now select Cruiser from palette — this should NOT affect Submarine
+    await p1.locator(".ship-palette-item:has-text('Cruiser')").click();
+    await p1.waitForTimeout(200);
+
+    // Verify Submarine is STILL on the board at c5, c6, c7
+    for (const coord of ["c5", "c6", "c7"]) {
+      const cell = p1.locator(".board-label:text('Your Board')").locator("..").locator(`[title="${coord}"]`);
+      const className = await cell.getAttribute("class");
+      expect(className).toContain("ship");
+    }
+
+    // Verify ship counter still shows 1/5 (Submarine still placed)
+    await expect(p1.locator("button:has-text('Place all ships (1/5)')")).toBeVisible({ timeout: 3_000 });
+
+    await p1Ctx.close();
+    await p2Ctx.close();
+  });
 });
 
 test.describe("Battle Start — Both Ready (Scenarios 6.1-6.2)", () => {
