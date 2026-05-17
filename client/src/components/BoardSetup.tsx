@@ -116,6 +116,9 @@ const BoardSetup: React.FC<BoardSetupProps> = ({
         for (let col = 0; col < 10; col++) {
           const cell = ownBoard.grid[row][col];
           if (cell.status === "ship" && cell.shipType === shipType) {
+            // Skip if already found for this ship type — record only the FIRST cell as start position
+            if (newPlaced.has(shipType)) continue;
+
             // Determine orientation by checking adjacent cell
             const isHorizontal =
               col < 9 && ownBoard.grid[row][col + 1]?.shipType === shipType;
