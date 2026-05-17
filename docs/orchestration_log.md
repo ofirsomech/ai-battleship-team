@@ -26,3 +26,11 @@
 2026-05-16T22:24:00Z | Phase 2 (Review) | requirements-reviewer | dev | review | AC_COV |
 2026-05-16T22:43:00Z | Phase 3 | qa-planner | feature/qa-plan | spawn | COMPLETED |
 2026-05-16T22:50:00Z | Phase 3 | coverage-validator | feature/qa-plan | spawn | COMPLETED |
+2026-05-16T22:59:00Z | Phase 3 | orchestrator | feature/qa-plan → dev | merge | OK |
+2026-05-16T23:45:00Z | Phase 3 | qa-impl | feature/qa-impl-playwright | spawn | COMPLETED |
+2026-05-16T23:46:00Z | Phase 3 | orchestrator | feature/qa-impl-playwright → dev | merge | OK |
+2026-05-17T01:53:00Z | Phase 3 | negative-qa | feature/qa-negative | spawn | COMPLETED |
+2026-05-17T01:54:00Z | Phase 3 | orchestrator | feature/qa-negative → dev | merge | OK |
+2026-05-17T04:51:00Z | Phase 3 | template-reviewer | feature/client-app-styles | review | APPROVE |
+2026-05-17T04:51:00Z | Phase 3 | qa-impl-reviewer | feature/qa-impl-playwright | review | APPROVE |
+2026-05-17T04:51:00Z | Phase 3 | negative-qa-reviewer | feature/qa-negative | review | APPROVE |

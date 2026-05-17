@@ -753,6 +753,170 @@ async function test_forfeitAfter30s() {
 }
 
 // ================================================================
+// 17. PLACEMENT: Drag-drop carrier to a1 (SCENARIO 3.1)
+// ================================================================
+async function testPlacement_dragDrop() {
+  console.log("\n=== Test 17: Drag-Drop Carrier to a1 ===");
+  const browser = await chromium.launch({ headless: true, channel: "chrome" });
+  try {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector("text=Create Room", { timeout: 15_000 });
+    await page.click("button:has-text('Create Room')");
+    await page.waitForSelector("text=Place Your Fleet", { timeout: 15_000 });
+
+    // Drag carrier (first ship palette item) to cell a1
+    const carrier = page.locator(".ship-palette-item").first();
+    const target = page.locator('[title="a1"]').first();
+    await carrier.dragTo(target);
+    await page.waitForTimeout(500);
+
+    // Verify a1-a5 have "ship" class
+    let shipCells = 0;
+    for (const cell of ["a1","a2","a3","a4","a5"]) {
+      const c = page.locator('[title="' + cell + '"]').first();
+      const cls = (await c.getAttribute("class").catch(() => "")) || "";
+      if (cls.includes("ship")) shipCells++;
+    }
+    const passed = shipCells === 5;
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, "test-drag-drop.png"), fullPage: true });
+    logResult("Test 17: Drag-Drop", passed, `Ship cells in a1-a5: ${shipCells}/5`, "test-drag-drop.png");
+    await ctx.close();
+  } catch (e) {
+    logResult("Test 17: Drag-Drop", false, `Exception: ${e.message}`, "");
+  } finally {
+    await browser.close().catch(() => {});
+  }
+}
+
+// ================================================================
+// 18. PLACEMENT: Rotate carrier to vertical (SCENARIO 3.2)
+// ================================================================
+async function testPlacement_rotate() {
+  console.log("\n=== Test 18: Rotate Carrier Vertical ===");
+  const browser = await chromium.launch({ headless: true, channel: "chrome" });
+  try {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector("text=Create Room", { timeout: 15_000 });
+    await page.click("button:has-text('Create Room')");
+    await page.waitForSelector("text=Place Your Fleet", { timeout: 15_000 });
+
+    // Press R to rotate, then drag to f1
+    await page.keyboard.press("r");
+    await page.waitForTimeout(300);
+    const carrier = page.locator(".ship-palette-item").first();
+    const target = page.locator('[title="f1"]').first();
+    await carrier.dragTo(target);
+    await page.waitForTimeout(500);
+
+    // Verify f1-f5 have "ship" class
+    let shipCells = 0;
+    for (const cell of ["f1","f2","f3","f4","f5"]) {
+      const c = page.locator('[title="' + cell + '"]').first();
+      const cls = (await c.getAttribute("class").catch(() => "")) || "";
+      if (cls.includes("ship")) shipCells++;
+    }
+    const passed = shipCells === 5;
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, "test-rotate.png"), fullPage: true });
+    logResult("Test 18: Rotate Vertical", passed, `Ship cells in f1-f5: ${shipCells}/5`, "test-rotate.png");
+    await ctx.close();
+  } catch (e) {
+    logResult("Test 18: Rotate Vertical", false, `Exception: ${e.message}`, "");
+  } finally {
+    await browser.close().catch(() => {});
+  }
+}
+
+// ================================================================
+// 19. PLACEMENT: Reposition carrier from a1 to c3 (SCENARIO 3.3)
+// ================================================================
+async function testPlacement_reposition() {
+  console.log("\n=== Test 19: Reposition Carrier ===");
+  const browser = await chromium.launch({ headless: true, channel: "chrome" });
+  try {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector("text=Create Room", { timeout: 15_000 });
+    await page.click("button:has-text('Create Room')");
+    await page.waitForSelector("text=Place Your Fleet", { timeout: 15_000 });
+
+    // First placement: carrier to a1
+    const carrier = page.locator(".ship-palette-item").first();
+    await carrier.dragTo(page.locator('[title="a1"]').first());
+    await page.waitForTimeout(300);
+
+    // Reposition: carrier to c3
+    await carrier.dragTo(page.locator('[title="c3"]').first());
+    await page.waitForTimeout(500);
+
+    // a1 should be empty, c3-c7 should have ship
+    const a1Cls = (await page.locator('[title="a1"]').first().getAttribute("class").catch(() => "")) || "";
+    let shipCells = 0;
+    for (const cell of ["c3","c4","c5","c6","c7"]) {
+      const c = page.locator('[title="' + cell + '"]').first();
+      const cls = (await c.getAttribute("class").catch(() => "")) || "";
+      if (cls.includes("ship")) shipCells++;
+    }
+    const passed = !a1Cls.includes("ship") && shipCells === 5;
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, "test-reposition.png"), fullPage: true });
+    logResult("Test 19: Reposition", passed, `a1 empty:${!a1Cls.includes("ship")} c3-c7 ships:${shipCells}/5`, "test-reposition.png");
+    await ctx.close();
+  } catch (e) {
+    logResult("Test 19: Reposition", false, `Exception: ${e.message}`, "");
+  } finally {
+    await browser.close().catch(() => {});
+  }
+}
+
+// ================================================================
+// 20. PLACEMENT: Randomize replaces manual ships (SCENARIO 4.2)
+// ================================================================
+async function testPlacement_randomizeReplaces() {
+  console.log("\n=== Test 20: Randomize Replaces Manual Ships ===");
+  const browser = await chromium.launch({ headless: true, channel: "chrome" });
+  try {
+    const ctx = await browser.newContext();
+    const page = await ctx.newPage();
+    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector("text=Create Room", { timeout: 15_000 });
+    await page.click("button:has-text('Create Room')");
+    await page.waitForSelector("text=Place Your Fleet", { timeout: 15_000 });
+
+    // Place 2 ships manually
+    const ships = page.locator(".ship-palette-item");
+    await ships.nth(0).dragTo(page.locator('[title="a1"]').first());
+    await page.waitForTimeout(300);
+    await ships.nth(1).dragTo(page.locator('[title="b1"]').first());
+    await page.waitForTimeout(500);
+
+    // Click Randomize
+    await page.click("button:has-text('🎲 Randomize')");
+    await page.waitForTimeout(800);
+
+    // Count total ship cells — should be 17
+    let totalShips = 0;
+    for (const cell of allCells) {
+      const c = page.locator('[title="' + cell + '"]').first();
+      const cls = (await c.getAttribute("class").catch(() => "")) || "";
+      if (cls.includes("ship")) totalShips++;
+    }
+    const readyVisible = await page.locator("button:has-text('✅ Ready!')").isVisible({ timeout: 5_000 }).catch(() => false);
+    const passed = readyVisible && totalShips === 17;
+    await page.screenshot({ path: path.join(SCREENSHOT_DIR, "test-randomize-replaces.png"), fullPage: true });
+    logResult("Test 20: Randomize Replaces", passed, `Ready:${readyVisible} Ships:${totalShips}/17`, "test-randomize-replaces.png");
+    await ctx.close();
+  } catch (e) {
+    logResult("Test 20: Randomize Replaces", false, `Exception: ${e.message}`, "");
+  } finally {
+    await browser.close().catch(() => {});
+  }
+}
+
+// ================================================================
 // Main
 // ================================================================
 async function main() {
@@ -780,6 +944,10 @@ async function main() {
   await test_disconnectPlacement();
   await test_reconnectMidBattle();
   await test_forfeitAfter30s();
+  await testPlacement_dragDrop();
+  await testPlacement_rotate();
+  await testPlacement_reposition();
+  await testPlacement_randomizeReplaces();
 
   const elapsed = Math.round((Date.now() - start) / 1000);
   const passedCount = results.filter(r => r.passed).length;
