@@ -1,0 +1,241 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================================================
+   Theme Tokens — Navy / Battleship color palette
+   ================================================================ */
+
+:root {
+  --color-navy-900: #0f172a;
+  --color-navy-800: #1e293b;
+  --color-navy-700: #334155;
+  --color-navy-600: #475569;
+
+  --color-grid-bg: #1e293b;
+  --color-grid-border: #475569;
+  --color-cell-empty: #1e293b;
+  --color-cell-hover: #334155;
+  --color-ship-blue: #2563eb;
+  --color-ship-border: #60a5fa;
+  --color-hit-red: #dc2626;
+  --color-hit-border: #f87171;
+  --color-sunk-bg: #7f1d1d;
+  --color-sunk-border: #ef4444;
+  --color-miss-bg: #4b5563;
+
+  --color-success: #16a34a;
+  --color-warning: #ca8a04;
+  --color-danger: #dc2626;
+  --color-info: #2563eb;
+}
+
+/* ---- Base ---------------------------------------------------- */
+body {
+  @apply bg-gray-900 text-gray-100 font-mono overflow-x-hidden;
+  margin: 0;
+}
+
+/* ================================================================
+   Keyframe Animations
+   ================================================================ */
+
+/* Pulse animation for hit cells — subtle red glow */
+@keyframes pulse-hit {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 6px 2px rgba(220, 38, 38, 0.3);
+  }
+}
+
+/* Sunk reveal animation — border highlight sweep */
+@keyframes sunk-reveal {
+  0% {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+  50% {
+    border-color: #fca5a5;
+    box-shadow: 0 0 8px 2px rgba(239, 68, 68, 0.4);
+  }
+  100% {
+    border-color: #ef4444;
+    box-shadow: 0 0 4px 1px rgba(239, 68, 68, 0.2);
+  }
+}
+
+/* ---- Cell Styles --------------------------------------------- */
+.cell {
+  @apply w-[clamp(24px,6vw,44px)] h-[clamp(24px,6vw,44px)]
+         border border-gray-600 flex items-center justify-center
+         text-[clamp(10px,2vw,14px)] font-bold cursor-default select-none
+         transition-colors duration-150;
+}
+
+.cell.empty {
+  @apply bg-gray-800 hover:bg-gray-700;
+}
+
+.cell.ship {
+  @apply bg-blue-600 border-blue-400;
+}
+
+/* Hit: red bg + pulse animation */
+.cell.hit {
+  @apply bg-red-600 border-red-400 text-white;
+  animation: pulse-hit 1.2s ease-in-out infinite;
+}
+
+.cell.miss {
+  @apply bg-gray-600 text-gray-400;
+}
+
+/* Sunk: dark red bg, distinct border + crossed-out V + sunk-reveal animation */
+.cell.sunk {
+  @apply bg-red-950 border-red-500 text-white line-through;
+  animation: sunk-reveal 1.5s ease-in-out infinite;
+}
+
+/* Tracking board clickable cells */
+.cell.shootable {
+  @apply cursor-crosshair;
+}
+
+.cell.shootable.empty:not(.hit):not(.miss):not(.sunk):hover {
+  @apply bg-gray-600 ring-1 ring-yellow-400;
+}
+
+/* Placement board drop zones */
+.cell.drop-target {
+  @apply cursor-pointer;
+}
+
+.cell.drop-target.empty:hover {
+  @apply bg-blue-800 ring-1 ring-blue-400;
+}
+
+.cell.drag-over {
+  @apply bg-blue-700 ring-2 ring-yellow-400;
+}
+
+.cell.placing-preview {
+  @apply bg-blue-600 opacity-50;
+}
+
+/* ---- Ship Palette -------------------------------------------- */
+.ship-palette-item {
+  @apply flex items-center gap-1 p-2 rounded cursor-grab bg-blue-800
+         hover:bg-blue-700 active:cursor-grabbing transition-colors
+         min-h-[44px] min-w-[44px];
+}
+
+.ship-palette-item.placed {
+  @apply opacity-40 cursor-not-allowed bg-gray-700;
+}
+
+.ship-segment {
+  @apply w-[clamp(20px,5vw,32px)] h-[clamp(20px,5vw,32px)]
+         border border-blue-400 bg-blue-600 rounded-sm;
+}
+
+/* ---- Turn Indicator ------------------------------------------ */
+.turn-indicator {
+  @apply px-4 py-2 rounded-lg text-lg font-bold text-center transition-colors duration-300;
+}
+
+.turn-indicator.my-turn {
+  @apply bg-green-700 text-white animate-pulse;
+}
+
+.turn-indicator.opponent-turn {
+  @apply bg-gray-700 text-gray-300;
+}
+
+/* ---- Game Over Modal ----------------------------------------- */
+.game-over-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4;
+}
+
+.game-over-modal {
+  @apply bg-gray-800 rounded-xl p-6 sm:p-8 max-w-[90vw] max-h-[90vh] overflow-auto
+         w-full text-center shadow-2xl border border-gray-600;
+}
+
+/* ---- Board Layout -------------------------------------------- */
+.board-container {
+  @apply flex flex-col items-center gap-2;
+}
+
+.board-label {
+  @apply text-sm text-gray-400 font-semibold uppercase tracking-wider;
+}
+
+.board-coordinates-row {
+  @apply flex;
+}
+
+/* Coordinate labels: a-j columns, centered over each cell */
+.board-coordinate-label {
+  @apply w-[clamp(24px,6vw,44px)] h-6 flex items-center justify-center
+         text-[clamp(8px,1.5vw,12px)] text-gray-500 uppercase;
+}
+
+.board-row {
+  @apply flex;
+}
+
+/* Row labels: 1-10, aligned to the left of each row */
+.row-label {
+  @apply w-6 h-[clamp(24px,6vw,44px)] flex items-center justify-center
+         text-[clamp(8px,1.5vw,12px)] text-gray-500;
+}
+
+/* ---- Ship on Own Board during Battle ------------------------- */
+.cell.ship-revealed {
+  @apply bg-blue-700 border-blue-500;
+}
+
+/* ---- Action Buttons (utility classes for non-UI-component usage) ---- */
+.btn {
+  @apply px-4 py-2 rounded font-semibold transition-colors duration-150
+         disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-500 text-white;
+}
+
+.btn-danger {
+  @apply bg-red-600 hover:bg-red-500 text-white;
+}
+
+.btn-success {
+  @apply bg-green-600 hover:bg-green-500 text-white;
+}
+
+.btn-secondary {
+  @apply bg-gray-600 hover:bg-gray-500 text-white;
+}
+
+/* ---- Input --------------------------------------------------- */
+.input {
+  @apply bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-100
+         focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono uppercase;
+}
+
+/* ---- Key Hint ------------------------------------------------ */
+.key-hint {
+  @apply text-xs text-gray-500 mt-1;
+}
+
+/* ---- Placement ships list ------------------------------------ */
+.placed-ship {
+  @apply flex items-center gap-2 px-3 py-1 rounded bg-gray-700 text-sm;
+}
+
+.placed-ship.ready {
+  @apply bg-green-800;
+}
