@@ -1,7 +1,7 @@
 # Playwright QA Run — Final Results
 
-> **Run at:** 2026-05-17T09:59:40.531Z
-> **Elapsed:** 260s
+> **Run at:** 2026-05-18T11:51:31.476Z
+> **Elapsed:** 286s
 > **Base URL:** http://localhost:5173
 > **Method:** Playwright direct API (`chromium.launch`), `channel:"chrome"`
 
@@ -10,8 +10,8 @@
 | Metric | Count |
 |---|---|
 | Total | 20 |
-| ✅ Passed | 14 |
-| ❌ Failed | 6 |
+| ✅ Passed | 16 |
+| ❌ Failed | 4 |
 
 ## Detailed Results
 
@@ -97,29 +97,21 @@
 
 ### ❌ Test 17: Drag-Drop
 
-- **Detail:** Exception: page.waitForSelector: Timeout 15000ms exceeded.
-Call log:
-  - waiting for locator('text=Place Your Fleet') to be visible
+- **Detail:** Ship cells in a1-a5: 1/5
+- **Screenshot:** `test-drag-drop.png`
 
+### ✅ Test 18: Rotate Vertical
 
-### ❌ Test 18: Rotate Vertical
-
-- **Detail:** Exception: page.waitForSelector: Timeout 15000ms exceeded.
-Call log:
-  - waiting for locator('text=Place Your Fleet') to be visible
-
+- **Detail:** Ship cells in f1-f5: 5/5
+- **Screenshot:** `test-rotate.png`
 
 ### ❌ Test 19: Reposition
 
-- **Detail:** Exception: page.waitForSelector: Timeout 15000ms exceeded.
-Call log:
-  - waiting for locator('text=Place Your Fleet') to be visible
+- **Detail:** a1 empty:false c3-c7 ships:0/5
+- **Screenshot:** `test-reposition.png`
 
 
-### ❌ Test 20: Randomize Replaces
-
-- **Detail:** Exception: page.waitForSelector: Timeout 15000ms exceeded.
-Call log:
-  - waiting for locator('text=Place Your Fleet') to be visible
-
-
+=== DONE ===
+Elapsed: 286s
+Results: 16/20 passed, 4 failed
+Report: /Users/ofir/Documents/stampli/ai-battleship-team/docs/test-results/playwright-run-final.md
