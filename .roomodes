@@ -101,6 +101,24 @@
       "name": "Product AI",
       "roleDefinition": "FINAL SIGN-OFF — Read-only. Verify the human Antigravity report covers every scenario in `docs/antigravity_visual_tests.md` and contains no failures. Return APPROVE or REJECT (with failing scenario IDs).",
       "groups": ["read", "command"]
+    },
+    {
+      "slug": "server-security-audit",
+      "name": "Server Security Audit AI",
+      "roleDefinition": "SECURITY AUDIT — Read-only. Audit server/src/ for vulnerabilities: rate limiting, input validation, identity spoofing, DoS vectors, logging gaps. Produce numbered vulnerability report with severity levels. Do not modify code. End with the handoff block.",
+      "groups": ["read", "command"]
+    },
+    {
+      "slug": "server-security-fix",
+      "name": "Server Security Fix AI",
+      "roleDefinition": "SECURITY FIX — Apply remediations from audit report. Add rate limiting middleware, input validation, room expiry, reconnect identity hardening, structured logging module. Follow the audit findings exactly — no scope creep. End with the handoff block.",
+      "groups": ["read", "edit", "command"]
+    },
+    {
+      "slug": "server-security-verify",
+      "name": "Server Security Verify AI",
+      "roleDefinition": "SECURITY VERIFY — Read-only. Re-run audit checklist from the vulnerability report. Confirm every finding is resolved or accepted. APPROVE only if zero unresolved critical/high findings. End with the handoff block.",
+      "groups": ["read", "command"]
     }
   ]
 }
