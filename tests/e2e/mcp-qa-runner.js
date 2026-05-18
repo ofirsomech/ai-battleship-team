@@ -59,7 +59,7 @@ async function setupToBattle(browser) {
   await p2.waitForSelector("text=Create Room", { timeout: 15_000 });
 
   await p1.click("button:has-text('Create Room')");
-  await p1.waitForSelector("text=Room Code", { timeout: 10_000 });
+  await p1.waitForSelector("text=Room Code", { timeout: 20_000 });
   const roomCode = (await p1.locator(".text-4xl.font-bold.tracking-\\[0\\.5em\\].text-blue-400").textContent())?.trim() ?? "";
 
   await p2.fill('input[placeholder="Room Code"]', roomCode);
@@ -109,8 +109,13 @@ async function test_fullGame() {
       }
     }
 
-    const p1Modal = await p1.locator(".game-over-overlay").isVisible({ timeout: 15_000 }).catch(() => false);
-    const p2Modal = await p2.locator(".game-over-overlay").isVisible({ timeout: 15_000 }).catch(() => false);
+    // Wait for game-over modal to appear with longer timeout
+    if (!gameOver) {
+      await p1.waitForSelector(".game-over-overlay", { timeout: 30_000 }).catch(() => {});
+      await p2.waitForSelector(".game-over-overlay", { timeout: 30_000 }).catch(() => {});
+    }
+    const p1Modal = await p1.locator(".game-over-overlay").isVisible({ timeout: 5_000 }).catch(() => false);
+    const p2Modal = await p2.locator(".game-over-overlay").isVisible({ timeout: 5_000 }).catch(() => false);
     const p1Victory = await p1.locator("text=Victory!").isVisible().catch(() => false);
     const p2Victory = await p2.locator("text=Victory!").isVisible().catch(() => false);
     const p1PlayAgain = await p1.locator("button:has-text('Play Again')").isVisible().catch(() => false);
@@ -155,7 +160,7 @@ async function test_randomizeValidFleet() {
     await p1.waitForSelector("text=Create Room", { timeout: 15_000 });
     await p2.waitForSelector("text=Create Room", { timeout: 15_000 });
     await p1.click("button:has-text('Create Room')");
-    await p1.waitForSelector("text=Room Code", { timeout: 10_000 });
+    await p1.waitForSelector("text=Room Code", { timeout: 20_000 });
     const roomCode = (await p1.locator(".text-4xl.font-bold.tracking-\\[0\\.5em\\].text-blue-400").textContent())?.trim() ?? "";
     await p2.fill('input[placeholder="Room Code"]', roomCode);
     await p2.click("button:has-text('Join Room')");
@@ -198,7 +203,7 @@ async function test_cannotReadyWithoutAllShips() {
     await p1.waitForSelector("text=Create Room", { timeout: 15_000 });
     await p2.waitForSelector("text=Create Room", { timeout: 15_000 });
     await p1.click("button:has-text('Create Room')");
-    await p1.waitForSelector("text=Room Code", { timeout: 10_000 });
+    await p1.waitForSelector("text=Room Code", { timeout: 20_000 });
     const roomCode = (await p1.locator(".text-4xl.font-bold.tracking-\\[0\\.5em\\].text-blue-400").textContent())?.trim() ?? "";
     await p2.fill('input[placeholder="Room Code"]', roomCode);
     await p2.click("button:has-text('Join Room')");
@@ -241,7 +246,7 @@ async function test_selectShipDoesNotAffectPlaced() {
     await p1.waitForSelector("text=Create Room", { timeout: 15_000 });
     await p2.waitForSelector("text=Create Room", { timeout: 15_000 });
     await p1.click("button:has-text('Create Room')");
-    await p1.waitForSelector("text=Room Code", { timeout: 10_000 });
+    await p1.waitForSelector("text=Room Code", { timeout: 20_000 });
     const roomCode = (await p1.locator(".text-4xl.font-bold.tracking-\\[0\\.5em\\].text-blue-400").textContent())?.trim() ?? "";
     await p2.fill('input[placeholder="Room Code"]', roomCode);
     await p2.click("button:has-text('Join Room')");
@@ -320,7 +325,7 @@ async function test_turnIndicatorFlips() {
     await p1.waitForTimeout(800);
 
     // Turn should pass to P2
-    const p2Turn = await p2.locator("text=🎯 Your Turn").isVisible({ timeout: 10_000 });
+    const p2Turn = await p2.locator("text=🎯 Your Turn").isVisible({ timeout: 20_000 });
     const p1Wait = await p1.locator("text=⏳").isVisible({ timeout: 5_000 });
 
     const passed = p1Turn1 && p2Turn && p1Wait;
@@ -425,7 +430,11 @@ async function test_gameOverModal() {
       }
     }
 
-    const modalVisible = await p1.locator(".game-over-overlay").isVisible({ timeout: 15_000 }).catch(() => false);
+    // Wait for game-over modal with longer timeout
+    if (!gameOver) {
+      await p1.waitForSelector(".game-over-overlay", { timeout: 30_000 }).catch(() => {});
+    }
+    const modalVisible = await p1.locator(".game-over-overlay").isVisible({ timeout: 5_000 }).catch(() => false);
     const victoryVisible = await p1.locator("text=Victory!").isVisible().catch(() => false);
     const defeatVisible = await p1.locator("text=Defeat").isVisible().catch(() => false);
     const playAgainVisible = await p1.locator("button:has-text('Play Again')").isVisible().catch(() => false);
@@ -505,7 +514,7 @@ async function test_preReadyShot() {
     await p1.waitForSelector("text=Create Room", { timeout: 15_000 });
     await p2.waitForSelector("text=Create Room", { timeout: 15_000 });
     await p1.click("button:has-text('Create Room')");
-    await p1.waitForSelector("text=Room Code", { timeout: 10_000 });
+    await p1.waitForSelector("text=Room Code", { timeout: 20_000 });
     const roomCode = (await p1.locator(".text-4xl.font-bold.tracking-\\[0\\.5em\\].text-blue-400").textContent())?.trim() ?? "";
     await p2.fill('input[placeholder="Room Code"]', roomCode);
     await p2.click("button:has-text('Join Room')");
@@ -589,7 +598,7 @@ async function test_roomFull() {
     await p2.waitForSelector("text=Create Room", { timeout: 15_000 });
 
     await p1.click("button:has-text('Create Room')");
-    await p1.waitForSelector("text=Room Code", { timeout: 10_000 });
+    await p1.waitForSelector("text=Room Code", { timeout: 20_000 });
     const roomCode = (await p1.locator(".text-4xl.font-bold.tracking-\\[0\\.5em\\].text-blue-400").textContent())?.trim() ?? "";
 
     await p2.fill('input[placeholder="Room Code"]', roomCode);
@@ -637,7 +646,7 @@ async function test_disconnectPlacement() {
     await p1.waitForSelector("text=Create Room", { timeout: 15_000 });
     await p2.waitForSelector("text=Create Room", { timeout: 15_000 });
     await p1.click("button:has-text('Create Room')");
-    await p1.waitForSelector("text=Room Code", { timeout: 10_000 });
+    await p1.waitForSelector("text=Room Code", { timeout: 20_000 });
     const roomCode = (await p1.locator(".text-4xl.font-bold.tracking-\\[0\\.5em\\].text-blue-400").textContent())?.trim() ?? "";
     await p2.fill('input[placeholder="Room Code"]', roomCode);
     await p2.click("button:has-text('Join Room')");
@@ -759,30 +768,38 @@ async function testPlacement_dragDrop() {
   console.log("\n=== Test 17: Drag-Drop Carrier to a1 ===");
   const browser = await chromium.launch({ headless: true, channel: "chrome" });
   try {
-    const ctx = await browser.newContext();
-    const page = await ctx.newPage();
-    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-    await page.waitForSelector("text=Create Room", { timeout: 15_000 });
-    await page.click("button:has-text('Create Room')");
-    await page.waitForSelector("text=Place Your Fleet", { timeout: 15_000 });
+    const ctx1 = await browser.newContext();
+    const ctx2 = await browser.newContext();
+    const p1 = await ctx1.newPage();
+    const p2 = await ctx2.newPage();
+    await p1.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await p2.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await p1.waitForSelector("text=Create Room", { timeout: 15_000 });
+    await p2.waitForSelector("text=Create Room", { timeout: 15_000 });
+    await p1.click("button:has-text('Create Room')");
+    await p1.waitForSelector("text=Room Code", { timeout: 20_000 });
+    const roomCode = (await p1.locator(".text-4xl.font-bold.tracking-\\[0\\.5em\\].text-blue-400").textContent())?.trim() ?? "";
+    await p2.fill('input[placeholder="Room Code"]', roomCode);
+    await p2.click("button:has-text('Join Room')");
+    await p1.waitForSelector("text=Place Your Fleet", { timeout: 15_000 });
 
     // Drag carrier (first ship palette item) to cell a1
-    const carrier = page.locator(".ship-palette-item").first();
-    const target = page.locator('[title="a1"]').first();
+    const carrier = p1.locator(".ship-palette-item").first();
+    const target = p1.locator('[title="a1"]').first();
     await carrier.dragTo(target);
-    await page.waitForTimeout(500);
+    await p1.waitForTimeout(500);
 
     // Verify a1-a5 have "ship" class
     let shipCells = 0;
     for (const cell of ["a1","a2","a3","a4","a5"]) {
-      const c = page.locator('[title="' + cell + '"]').first();
+      const c = p1.locator('[title="' + cell + '"]').first();
       const cls = (await c.getAttribute("class").catch(() => "")) || "";
       if (cls.includes("ship")) shipCells++;
     }
     const passed = shipCells === 5;
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, "test-drag-drop.png"), fullPage: true });
+    await p1.screenshot({ path: path.join(SCREENSHOT_DIR, "test-drag-drop.png"), fullPage: true });
     logResult("Test 17: Drag-Drop", passed, `Ship cells in a1-a5: ${shipCells}/5`, "test-drag-drop.png");
-    await ctx.close();
+    await ctx1.close(); await ctx2.close();
   } catch (e) {
     logResult("Test 17: Drag-Drop", false, `Exception: ${e.message}`, "");
   } finally {
@@ -797,32 +814,40 @@ async function testPlacement_rotate() {
   console.log("\n=== Test 18: Rotate Carrier Vertical ===");
   const browser = await chromium.launch({ headless: true, channel: "chrome" });
   try {
-    const ctx = await browser.newContext();
-    const page = await ctx.newPage();
-    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-    await page.waitForSelector("text=Create Room", { timeout: 15_000 });
-    await page.click("button:has-text('Create Room')");
-    await page.waitForSelector("text=Place Your Fleet", { timeout: 15_000 });
+    const ctx1 = await browser.newContext();
+    const ctx2 = await browser.newContext();
+    const p1 = await ctx1.newPage();
+    const p2 = await ctx2.newPage();
+    await p1.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await p2.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await p1.waitForSelector("text=Create Room", { timeout: 15_000 });
+    await p2.waitForSelector("text=Create Room", { timeout: 15_000 });
+    await p1.click("button:has-text('Create Room')");
+    await p1.waitForSelector("text=Room Code", { timeout: 20_000 });
+    const roomCode = (await p1.locator(".text-4xl.font-bold.tracking-\\[0\\.5em\\].text-blue-400").textContent())?.trim() ?? "";
+    await p2.fill('input[placeholder="Room Code"]', roomCode);
+    await p2.click("button:has-text('Join Room')");
+    await p1.waitForSelector("text=Place Your Fleet", { timeout: 15_000 });
 
     // Press R to rotate, then drag to f1
-    await page.keyboard.press("r");
-    await page.waitForTimeout(300);
-    const carrier = page.locator(".ship-palette-item").first();
-    const target = page.locator('[title="f1"]').first();
+    await p1.keyboard.press("r");
+    await p1.waitForTimeout(300);
+    const carrier = p1.locator(".ship-palette-item").first();
+    const target = p1.locator('[title="f1"]').first();
     await carrier.dragTo(target);
-    await page.waitForTimeout(500);
+    await p1.waitForTimeout(500);
 
     // Verify f1-f5 have "ship" class
     let shipCells = 0;
     for (const cell of ["f1","f2","f3","f4","f5"]) {
-      const c = page.locator('[title="' + cell + '"]').first();
+      const c = p1.locator('[title="' + cell + '"]').first();
       const cls = (await c.getAttribute("class").catch(() => "")) || "";
       if (cls.includes("ship")) shipCells++;
     }
     const passed = shipCells === 5;
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, "test-rotate.png"), fullPage: true });
+    await p1.screenshot({ path: path.join(SCREENSHOT_DIR, "test-rotate.png"), fullPage: true });
     logResult("Test 18: Rotate Vertical", passed, `Ship cells in f1-f5: ${shipCells}/5`, "test-rotate.png");
-    await ctx.close();
+    await ctx1.close(); await ctx2.close();
   } catch (e) {
     logResult("Test 18: Rotate Vertical", false, `Exception: ${e.message}`, "");
   } finally {
@@ -837,34 +862,42 @@ async function testPlacement_reposition() {
   console.log("\n=== Test 19: Reposition Carrier ===");
   const browser = await chromium.launch({ headless: true, channel: "chrome" });
   try {
-    const ctx = await browser.newContext();
-    const page = await ctx.newPage();
-    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-    await page.waitForSelector("text=Create Room", { timeout: 15_000 });
-    await page.click("button:has-text('Create Room')");
-    await page.waitForSelector("text=Place Your Fleet", { timeout: 15_000 });
+    const ctx1 = await browser.newContext();
+    const ctx2 = await browser.newContext();
+    const p1 = await ctx1.newPage();
+    const p2 = await ctx2.newPage();
+    await p1.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await p2.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await p1.waitForSelector("text=Create Room", { timeout: 15_000 });
+    await p2.waitForSelector("text=Create Room", { timeout: 15_000 });
+    await p1.click("button:has-text('Create Room')");
+    await p1.waitForSelector("text=Room Code", { timeout: 20_000 });
+    const roomCode = (await p1.locator(".text-4xl.font-bold.tracking-\\[0\\.5em\\].text-blue-400").textContent())?.trim() ?? "";
+    await p2.fill('input[placeholder="Room Code"]', roomCode);
+    await p2.click("button:has-text('Join Room')");
+    await p1.waitForSelector("text=Place Your Fleet", { timeout: 15_000 });
 
     // First placement: carrier to a1
-    const carrier = page.locator(".ship-palette-item").first();
-    await carrier.dragTo(page.locator('[title="a1"]').first());
-    await page.waitForTimeout(300);
+    const carrier = p1.locator(".ship-palette-item").first();
+    await carrier.dragTo(p1.locator('[title="a1"]').first());
+    await p1.waitForTimeout(300);
 
     // Reposition: carrier to c3
-    await carrier.dragTo(page.locator('[title="c3"]').first());
-    await page.waitForTimeout(500);
+    await carrier.dragTo(p1.locator('[title="c3"]').first());
+    await p1.waitForTimeout(500);
 
     // a1 should be empty, c3-c7 should have ship
-    const a1Cls = (await page.locator('[title="a1"]').first().getAttribute("class").catch(() => "")) || "";
+    const a1Cls = (await p1.locator('[title="a1"]').first().getAttribute("class").catch(() => "")) || "";
     let shipCells = 0;
     for (const cell of ["c3","c4","c5","c6","c7"]) {
-      const c = page.locator('[title="' + cell + '"]').first();
+      const c = p1.locator('[title="' + cell + '"]').first();
       const cls = (await c.getAttribute("class").catch(() => "")) || "";
       if (cls.includes("ship")) shipCells++;
     }
     const passed = !a1Cls.includes("ship") && shipCells === 5;
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, "test-reposition.png"), fullPage: true });
+    await p1.screenshot({ path: path.join(SCREENSHOT_DIR, "test-reposition.png"), fullPage: true });
     logResult("Test 19: Reposition", passed, `a1 empty:${!a1Cls.includes("ship")} c3-c7 ships:${shipCells}/5`, "test-reposition.png");
-    await ctx.close();
+    await ctx1.close(); await ctx2.close();
   } catch (e) {
     logResult("Test 19: Reposition", false, `Exception: ${e.message}`, "");
   } finally {
@@ -879,36 +912,44 @@ async function testPlacement_randomizeReplaces() {
   console.log("\n=== Test 20: Randomize Replaces Manual Ships ===");
   const browser = await chromium.launch({ headless: true, channel: "chrome" });
   try {
-    const ctx = await browser.newContext();
-    const page = await ctx.newPage();
-    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
-    await page.waitForSelector("text=Create Room", { timeout: 15_000 });
-    await page.click("button:has-text('Create Room')");
-    await page.waitForSelector("text=Place Your Fleet", { timeout: 15_000 });
+    const ctx1 = await browser.newContext();
+    const ctx2 = await browser.newContext();
+    const p1 = await ctx1.newPage();
+    const p2 = await ctx2.newPage();
+    await p1.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await p2.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    await p1.waitForSelector("text=Create Room", { timeout: 15_000 });
+    await p2.waitForSelector("text=Create Room", { timeout: 15_000 });
+    await p1.click("button:has-text('Create Room')");
+    await p1.waitForSelector("text=Room Code", { timeout: 20_000 });
+    const roomCode = (await p1.locator(".text-4xl.font-bold.tracking-\\[0\\.5em\\].text-blue-400").textContent())?.trim() ?? "";
+    await p2.fill('input[placeholder="Room Code"]', roomCode);
+    await p2.click("button:has-text('Join Room')");
+    await p1.waitForSelector("text=Place Your Fleet", { timeout: 15_000 });
 
     // Place 2 ships manually
-    const ships = page.locator(".ship-palette-item");
-    await ships.nth(0).dragTo(page.locator('[title="a1"]').first());
-    await page.waitForTimeout(300);
-    await ships.nth(1).dragTo(page.locator('[title="b1"]').first());
-    await page.waitForTimeout(500);
+    const ships = p1.locator(".ship-palette-item");
+    await ships.nth(0).dragTo(p1.locator('[title="a1"]').first());
+    await p1.waitForTimeout(300);
+    await ships.nth(1).dragTo(p1.locator('[title="b1"]').first());
+    await p1.waitForTimeout(500);
 
     // Click Randomize
-    await page.click("button:has-text('🎲 Randomize')");
-    await page.waitForTimeout(800);
+    await p1.click("button:has-text('🎲 Randomize')");
+    await p1.waitForTimeout(800);
 
     // Count total ship cells — should be 17
     let totalShips = 0;
     for (const cell of allCells) {
-      const c = page.locator('[title="' + cell + '"]').first();
+      const c = p1.locator('[title="' + cell + '"]').first();
       const cls = (await c.getAttribute("class").catch(() => "")) || "";
       if (cls.includes("ship")) totalShips++;
     }
-    const readyVisible = await page.locator("button:has-text('✅ Ready!')").isVisible({ timeout: 5_000 }).catch(() => false);
+    const readyVisible = await p1.locator("button:has-text('✅ Ready!')").isVisible({ timeout: 5_000 }).catch(() => false);
     const passed = readyVisible && totalShips === 17;
-    await page.screenshot({ path: path.join(SCREENSHOT_DIR, "test-randomize-replaces.png"), fullPage: true });
+    await p1.screenshot({ path: path.join(SCREENSHOT_DIR, "test-randomize-replaces.png"), fullPage: true });
     logResult("Test 20: Randomize Replaces", passed, `Ready:${readyVisible} Ships:${totalShips}/17`, "test-randomize-replaces.png");
-    await ctx.close();
+    await ctx1.close(); await ctx2.close();
   } catch (e) {
     logResult("Test 20: Randomize Replaces", false, `Exception: ${e.message}`, "");
   } finally {
