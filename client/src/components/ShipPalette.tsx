@@ -51,7 +51,7 @@ const ShipPalette: React.FC<ShipPaletteProps> = ({
               key={shipType}
               className={`ship-palette-item ${isPlaced ? "placed" : ""}`}
               draggable={!isPlaced}
-              onClick={() => !isPlaced && onSelectShip(shipType)}
+              onClick={() => onSelectShip(shipType)}
               onDragStart={(e) => {
                 if (isPlaced) {
                   e.preventDefault();

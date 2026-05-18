@@ -167,25 +167,21 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       const newOwnBoard = { ...state.ownBoard, grid: state.ownBoard.grid.map((r) => [...r]) };
       const newTrackingBoard = { ...state.trackingBoard, grid: state.trackingBoard.grid.map((r) => [...r]) };
 
-      // Update tracking board (where "we" shot)
-      if (result === "miss") {
-        newTrackingBoard.grid[row][col] = { status: "miss" };
-      } else if (result === "hit") {
-        newTrackingBoard.grid[row][col] = { status: "hit" };
-      } else if (result === "sunk") {
-        newTrackingBoard.grid[row][col] = { status: "sunk", shipType: sunkShip as import("@battleship/shared").ShipType | undefined };
-      }
+      // Determine if we (this client) fired this shot.
+      // state.currentTurn is still the shooter's turn before we update it below.
+      const isOurShot = state.currentTurn === state.playerId;
 
-      // Update own board (where opponent shot - the shotResult is broadcast to both, so we use board context)
-      // The shot is always on the opponent's board. Since both receive shotResult,
-      // we update the trackingBoard for the shooter and ownBoard for the target.
-      // We need to determine if this shot was against us:
-      const isOurShot = state.currentTurn === state.playerId && state.playerId !== nextTurn;
-      // Actually, the shotResult is broadcast to BOTH. The shooter sees it on trackingBoard,
-      // the target sees it on ownBoard. Since we always update trackingBoard above,
-      // we also check if the shot was against our own board.
-      if (!isOurShot) {
-        // The shot was by the opponent against our board → update ownBoard
+      if (isOurShot) {
+        // We are the shooter → update our tracking board
+        if (result === "miss") {
+          newTrackingBoard.grid[row][col] = { status: "miss" };
+        } else if (result === "hit") {
+          newTrackingBoard.grid[row][col] = { status: "hit" };
+        } else if (result === "sunk") {
+          newTrackingBoard.grid[row][col] = { status: "sunk", shipType: sunkShip as import("@battleship/shared").ShipType | undefined };
+        }
+      } else {
+        // The opponent fired this shot → update our own board (the shot landed on our ships)
         if (result === "miss") {
           newOwnBoard.grid[row][col] = { status: "miss" };
         } else if (result === "hit") {
@@ -194,10 +190,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
           newOwnBoard.grid[row][col] = { status: "sunk", shipType: sunkShip as import("@battleship/shared").ShipType | undefined };
         }
       }
-
-      const isGameOver = !!winner || result === "sunk";
-      // Check if game over: we can't know from a single shot - only server tells us
-      // via the winner field or subsequent gameOver event
 
       return {
         ...state,

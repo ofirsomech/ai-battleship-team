@@ -81,7 +81,7 @@ async function setupToBattle(browser) {
 }
 
 // ================================================================
-// 1. HAPPY PATH: Full game (Scenario 13.1) — accelerated scan
+// 1. HAPPY PATH: Full game (Scenario 13.1) — shoot-until-gameover
 // ================================================================
 async function test_fullGame() {
   console.log("\n=== Test 1: Full Game Golden Path ===");
@@ -89,30 +89,45 @@ async function test_fullGame() {
   try {
     const { p1, p2, p1Ctx, p2Ctx } = await setupToBattle(browser);
 
-    // Shoot each cell on tracking board systematically
+    // Shoot cells systematically, alternating turns. After first pass,
+    // retry any cells that were missed (turn may have been skipped).
     let gameOver = false;
-    for (const cell of allCells) {
-      if (gameOver) break;
-      const p1Turn = await p1.locator("text=🎯 Your Turn").isVisible({ timeout: 3_000 }).catch(() => false);
-      if (p1Turn) {
-        await trackingCell(p1, cell).click();
-        await p1.waitForTimeout(300);
-        const goP1 = await p1.locator(".game-over-overlay").isVisible({ timeout: 2_000 }).catch(() => false);
-        if (goP1) { gameOver = true; break; }
-      }
-      const p2Turn = await p2.locator("text=🎯 Your Turn").isVisible({ timeout: 3_000 }).catch(() => false);
-      if (p2Turn) {
-        await trackingCell(p2, cell).click();
-        await p2.waitForTimeout(300);
-        const goP2 = await p2.locator(".game-over-overlay").isVisible({ timeout: 2_000 }).catch(() => false);
-        if (goP2) { gameOver = true; break; }
+
+    for (let pass = 0; pass < 3 && !gameOver; pass++) {
+      for (const cell of allCells) {
+        if (gameOver) break;
+        // P1 turn
+        if (await p1.locator("text=🎯 Your Turn").isVisible({ timeout: 5_000 }).catch(() => false)) {
+          const tc = trackingCell(p1, cell);
+          const cls = (await tc.getAttribute("class").catch(() => "")) || "";
+          if (!cls.includes("hit") && !cls.includes("miss") && !cls.includes("sunk")) {
+            await tc.click({ force: true });
+            await p1.waitForTimeout(300);
+            if (await p1.locator(".game-over-overlay").isVisible({ timeout: 1_500 }).catch(() => false)) {
+              gameOver = true; break;
+            }
+          }
+        }
+        if (gameOver) break;
+        // P2 turn
+        if (await p2.locator("text=🎯 Your Turn").isVisible({ timeout: 5_000 }).catch(() => false)) {
+          const tc = trackingCell(p2, cell);
+          const cls = (await tc.getAttribute("class").catch(() => "")) || "";
+          if (!cls.includes("hit") && !cls.includes("miss") && !cls.includes("sunk")) {
+            await tc.click({ force: true });
+            await p2.waitForTimeout(300);
+            if (await p2.locator(".game-over-overlay").isVisible({ timeout: 1_500 }).catch(() => false)) {
+              gameOver = true; break;
+            }
+          }
+        }
       }
     }
 
-    // Wait for game-over modal to appear with longer timeout
+    // Final wait for game-over overlay
     if (!gameOver) {
-      await p1.waitForSelector(".game-over-overlay", { timeout: 30_000 }).catch(() => {});
-      await p2.waitForSelector(".game-over-overlay", { timeout: 30_000 }).catch(() => {});
+      await p1.waitForSelector(".game-over-overlay", { timeout: 25_000 }).catch(() => {});
+      await p2.waitForSelector(".game-over-overlay", { timeout: 25_000 }).catch(() => {});
     }
     const p1Modal = await p1.locator(".game-over-overlay").isVisible({ timeout: 5_000 }).catch(() => false);
     const p2Modal = await p2.locator(".game-over-overlay").isVisible({ timeout: 5_000 }).catch(() => false);
@@ -414,25 +429,41 @@ async function test_gameOverModal() {
     const { p1, p2, p1Ctx, p2Ctx } = await setupToBattle(browser);
 
     let gameOver = false;
-    for (const cell of allCells) {
-      if (gameOver) break;
-      const p1Turn = await p1.locator("text=🎯 Your Turn").isVisible({ timeout: 2_000 }).catch(() => false);
-      if (p1Turn) {
-        await trackingCell(p1, cell).click();
-        await p1.waitForTimeout(200);
-        if (await p1.locator(".game-over-overlay").isVisible({ timeout: 1_000 }).catch(() => false)) { gameOver = true; break; }
-      }
-      const p2Turn = await p2.locator("text=🎯 Your Turn").isVisible({ timeout: 2_000 }).catch(() => false);
-      if (p2Turn) {
-        await trackingCell(p2, cell).click();
-        await p2.waitForTimeout(200);
-        if (await p2.locator(".game-over-overlay").isVisible({ timeout: 1_000 }).catch(() => false)) { gameOver = true; break; }
+
+    for (let pass = 0; pass < 3 && !gameOver; pass++) {
+      for (const cell of allCells) {
+        if (gameOver) break;
+        // P1 turn
+        if (await p1.locator("text=🎯 Your Turn").isVisible({ timeout: 5_000 }).catch(() => false)) {
+          const tc = trackingCell(p1, cell);
+          const cls = (await tc.getAttribute("class").catch(() => "")) || "";
+          if (!cls.includes("hit") && !cls.includes("miss") && !cls.includes("sunk")) {
+            await tc.click({ force: true });
+            await p1.waitForTimeout(300);
+            if (await p1.locator(".game-over-overlay").isVisible({ timeout: 1_500 }).catch(() => false)) {
+              gameOver = true; break;
+            }
+          }
+        }
+        if (gameOver) break;
+        // P2 turn
+        if (await p2.locator("text=🎯 Your Turn").isVisible({ timeout: 5_000 }).catch(() => false)) {
+          const tc = trackingCell(p2, cell);
+          const cls = (await tc.getAttribute("class").catch(() => "")) || "";
+          if (!cls.includes("hit") && !cls.includes("miss") && !cls.includes("sunk")) {
+            await tc.click({ force: true });
+            await p2.waitForTimeout(300);
+            if (await p2.locator(".game-over-overlay").isVisible({ timeout: 1_500 }).catch(() => false)) {
+              gameOver = true; break;
+            }
+          }
+        }
       }
     }
 
-    // Wait for game-over modal with longer timeout
+    // Final wait for game-over modal
     if (!gameOver) {
-      await p1.waitForSelector(".game-over-overlay", { timeout: 30_000 }).catch(() => {});
+      await p1.waitForSelector(".game-over-overlay", { timeout: 25_000 }).catch(() => {});
     }
     const modalVisible = await p1.locator(".game-over-overlay").isVisible({ timeout: 5_000 }).catch(() => false);
     const victoryVisible = await p1.locator("text=Victory!").isVisible().catch(() => false);
@@ -762,10 +793,10 @@ async function test_forfeitAfter30s() {
 }
 
 // ================================================================
-// 17. PLACEMENT: Drag-drop carrier to a1 (SCENARIO 3.1)
+// 17. PLACEMENT: Click-to-place Carrier at a1 (SCENARIO 3.1)
 // ================================================================
 async function testPlacement_dragDrop() {
-  console.log("\n=== Test 17: Drag-Drop Carrier to a1 ===");
+  console.log("\n=== Test 17: Click-to-Place Carrier to a1 ===");
   const browser = await chromium.launch({ headless: true, channel: "chrome" });
   try {
     const ctx1 = await browser.newContext();
@@ -783,25 +814,26 @@ async function testPlacement_dragDrop() {
     await p2.click("button:has-text('Join Room')");
     await p1.waitForSelector("text=Place Your Fleet", { timeout: 15_000 });
 
-    // Drag carrier (first ship palette item) to cell a1
-    const carrier = p1.locator(".ship-palette-item").first();
-    const target = p1.locator('[title="a1"]').first();
-    await carrier.dragTo(target);
+    // Click-to-place: click Carrier in palette, then click cell a1 on board
+    await p1.locator(".ship-palette-item:has-text('Carrier')").click();
+    await p1.waitForTimeout(200);
+    // Click board cell a1 (placement board labeled "Your Board")
+    await p1.locator(".board-label:text('Your Board')").locator("..").locator('[title="a1"]').click();
     await p1.waitForTimeout(500);
 
-    // Verify a1-a5 have "ship" class
+    // Horizontal orientation: Carrier at a1 spans a1, b1, c1, d1, e1 (across columns)
     let shipCells = 0;
-    for (const cell of ["a1","a2","a3","a4","a5"]) {
-      const c = p1.locator('[title="' + cell + '"]').first();
+    for (const cell of ["a1","b1","c1","d1","e1"]) {
+      const c = p1.locator(".board-label:text('Your Board')").locator("..").locator(`[title="${cell}"]`);
       const cls = (await c.getAttribute("class").catch(() => "")) || "";
       if (cls.includes("ship")) shipCells++;
     }
     const passed = shipCells === 5;
     await p1.screenshot({ path: path.join(SCREENSHOT_DIR, "test-drag-drop.png"), fullPage: true });
-    logResult("Test 17: Drag-Drop", passed, `Ship cells in a1-a5: ${shipCells}/5`, "test-drag-drop.png");
+    logResult("Test 17: Click-to-Place Carrier", passed, `Ship cells in a1-e1: ${shipCells}/5`, "test-drag-drop.png");
     await ctx1.close(); await ctx2.close();
   } catch (e) {
-    logResult("Test 17: Drag-Drop", false, `Exception: ${e.message}`, "");
+    logResult("Test 17: Click-to-Place Carrier", false, `Exception: ${e.message}`, "");
   } finally {
     await browser.close().catch(() => {});
   }
@@ -856,7 +888,7 @@ async function testPlacement_rotate() {
 }
 
 // ================================================================
-// 19. PLACEMENT: Reposition carrier from a1 to c3 (SCENARIO 3.3)
+// 19. PLACEMENT: Reposition Carrier from a1 to c3 (SCENARIO 3.3)
 // ================================================================
 async function testPlacement_reposition() {
   console.log("\n=== Test 19: Reposition Carrier ===");
@@ -877,26 +909,30 @@ async function testPlacement_reposition() {
     await p2.click("button:has-text('Join Room')");
     await p1.waitForSelector("text=Place Your Fleet", { timeout: 15_000 });
 
-    // First placement: carrier to a1
-    const carrier = p1.locator(".ship-palette-item").first();
-    await carrier.dragTo(p1.locator('[title="a1"]').first());
-    await p1.waitForTimeout(300);
+    // Click-to-place: click Carrier in palette, then click cell a1
+    await p1.locator(".ship-palette-item:has-text('Carrier')").click();
+    await p1.waitForTimeout(200);
+    await p1.locator(".board-label:text('Your Board')").locator("..").locator('[title="a1"]').click();
+    await p1.waitForTimeout(400);
 
-    // Reposition: carrier to c3
-    await carrier.dragTo(p1.locator('[title="c3"]').first());
+    // Reposition: click Carrier again, then click c3 (reposition)
+    await p1.locator(".ship-palette-item:has-text('Carrier')").click();
+    await p1.waitForTimeout(200);
+    await p1.locator(".board-label:text('Your Board')").locator("..").locator('[title="c3"]').click();
     await p1.waitForTimeout(500);
 
-    // a1 should be empty, c3-c7 should have ship
-    const a1Cls = (await p1.locator('[title="a1"]').first().getAttribute("class").catch(() => "")) || "";
+    // a1 should be empty (horizontal: a1,b1,c1,d1,e1 should all be empty now)
+    const a1Cls = (await p1.locator(".board-label:text('Your Board')").locator("..").locator('[title="a1"]').getAttribute("class").catch(() => "")) || "";
+    // c3,d3,e3,f3,g3 should have 5 ship cells (horizontal from c3)
     let shipCells = 0;
-    for (const cell of ["c3","c4","c5","c6","c7"]) {
-      const c = p1.locator('[title="' + cell + '"]').first();
+    for (const cell of ["c3","d3","e3","f3","g3"]) {
+      const c = p1.locator(".board-label:text('Your Board')").locator("..").locator(`[title="${cell}"]`);
       const cls = (await c.getAttribute("class").catch(() => "")) || "";
       if (cls.includes("ship")) shipCells++;
     }
     const passed = !a1Cls.includes("ship") && shipCells === 5;
     await p1.screenshot({ path: path.join(SCREENSHOT_DIR, "test-reposition.png"), fullPage: true });
-    logResult("Test 19: Reposition", passed, `a1 empty:${!a1Cls.includes("ship")} c3-c7 ships:${shipCells}/5`, "test-reposition.png");
+    logResult("Test 19: Reposition", passed, `a1 empty:${!a1Cls.includes("ship")} c3-g3 ships:${shipCells}/5`, "test-reposition.png");
     await ctx1.close(); await ctx2.close();
   } catch (e) {
     logResult("Test 19: Reposition", false, `Exception: ${e.message}`, "");

@@ -1,7 +1,7 @@
 # Playwright QA Run — Final Results
 
-> **Run at:** 2026-05-18T11:51:31.476Z
-> **Elapsed:** 286s
+> **Run at:** 2026-05-18T22:35:00.770Z
+> **Elapsed:** 200s
 > **Base URL:** http://localhost:5173
 > **Method:** Playwright direct API (`chromium.launch`), `channel:"chrome"`
 
@@ -10,14 +10,14 @@
 | Metric | Count |
 |---|---|
 | Total | 20 |
-| ✅ Passed | 16 |
-| ❌ Failed | 4 |
+| ✅ Passed | 20 |
+| ❌ Failed | 0 |
 
 ## Detailed Results
 
-### ❌ Test 1: Full Game Golden Path
+### ✅ Test 1: Full Game Golden Path
 
-- **Detail:** Modal P1:false P2:false DiffVictory:false PlayAgain:false
+- **Detail:** Modal P1:true P2:true DiffVictory:true PlayAgain:true
 - **Screenshot:** `test-full-game.png`
 
 ### ✅ Test 2: Randomize Valid Fleet
@@ -47,7 +47,7 @@
 
 ### ✅ Test 7: Hit Shows V on Both Clients
 
-- **Detail:** Class:cell miss Text:"x" Hit:false Miss:true
+- **Detail:** Class:cell hit Text:"V" Hit:true Miss:false
 - **Screenshot:** `test-hit-marker.png`
 
 ### ✅ Test 8: Miss Shows X on Both Clients
@@ -55,9 +55,9 @@
 - **Detail:** Class:"cell miss" Text:"x"
 - **Screenshot:** `test-miss-marker.png`
 
-### ❌ Test 9: Game Over Modal
+### ✅ Test 9: Game Over Modal
 
-- **Detail:** Modal:false Victory:false Defeat:false PlayAgain:false
+- **Detail:** Modal:true Victory:false Defeat:true PlayAgain:true
 - **Screenshot:** `test-game-over.png`
 
 ### ✅ Test 10: Double-Shot Rejection (AC-10)
@@ -95,9 +95,9 @@
 - **Detail:** Modal:true Victory:true PlayAgain:true
 - **Screenshot:** `test-forfeit.png`
 
-### ❌ Test 17: Drag-Drop
+### ✅ Test 17: Click-to-Place Carrier
 
-- **Detail:** Ship cells in a1-a5: 1/5
+- **Detail:** Ship cells in a1-e1: 5/5
 - **Screenshot:** `test-drag-drop.png`
 
 ### ✅ Test 18: Rotate Vertical
@@ -105,13 +105,13 @@
 - **Detail:** Ship cells in f1-f5: 5/5
 - **Screenshot:** `test-rotate.png`
 
-### ❌ Test 19: Reposition
+### ✅ Test 19: Reposition
 
-- **Detail:** a1 empty:false c3-c7 ships:0/5
+- **Detail:** a1 empty:true c3-g3 ships:5/5
 - **Screenshot:** `test-reposition.png`
 
-
+### �
 === DONE ===
-Elapsed: 286s
-Results: 16/20 passed, 4 failed
+Elapsed: 200s
+Results: 20/20 passed, 0 failed
 Report: /Users/ofir/Documents/stampli/ai-battleship-team/docs/test-results/playwright-run-final.md
