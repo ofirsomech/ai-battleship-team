@@ -67,6 +67,10 @@ export const SHIP_LENGTHS: Record<ShipType, number> = {
 
 export type GamePhase = "lobby" | "placement" | "battle" | "gameOver";
 
+// ---- Game Mode ----------------------------------------------
+
+export type GameMode = "multiplayer" | "ai";
+
 // ---- Players ------------------------------------------------
 
 export interface Player {
@@ -84,6 +88,8 @@ export interface GameState {
   roomCode: string;
   players: Player[];
   phase: GamePhase;
+  /** The game mode — defaults to "multiplayer" if not set. */
+  gameMode?: GameMode;
   /** playerId of the player whose turn it is; null when not in battle. */
   currentTurn: string | null;
   /** playerId of the winner; null until game over. */
@@ -97,6 +103,11 @@ export interface ShipPlacement {
   start: Coordinate;
   orientation: Orientation;
 }
+
+// ---- AI -----------------------------------------------------
+
+/** Timeout in ms for AI move decisions before fallback to random shot. */
+export const AI_DECISION_TIMEOUT_MS = 15_000;
 
 // ---- Shot / Battle ------------------------------------------
 
