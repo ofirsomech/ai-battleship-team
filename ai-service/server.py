@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import traceback
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -43,12 +44,17 @@ def decide():
 
     try:
         agent = get_agent()
-        result = agent.decide(data)
+        # Use a thread timeout so CrewAI doesn't block the endpoint forever
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(agent.decide, data)
+            result = future.result(timeout=10)  # 10s internal timeout
         return jsonify(result)
-    except Exception as e:
+    except (FuturesTimeoutError, Exception) as e:
         # Log error and fall back to random valid coordinate
-        print(f"[AI-ERROR] {e}", file=sys.stderr)
-        traceback.print_exc(file=sys.stderr)
+        reason = "timeout" if isinstance(e, FuturesTimeoutError) else str(e)
+        print(f"[AI-ERROR] {reason}", file=sys.stderr)
+        if not isinstance(e, FuturesTimeoutError):
+            traceback.print_exc(file=sys.stderr)
 
         # Calculate a random valid coordinate from tracking board
         coordinate = _random_fallback(data)

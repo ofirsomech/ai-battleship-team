@@ -107,7 +107,7 @@ export interface ShipPlacement {
 // ---- AI -----------------------------------------------------
 
 /** Timeout in ms for AI move decisions before fallback to random shot. */
-export const AI_DECISION_TIMEOUT_MS = 15_000;
+export const AI_DECISION_TIMEOUT_MS = 60_000;
 
 // ---- Shot / Battle ------------------------------------------
 
