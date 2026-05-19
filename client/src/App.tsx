@@ -49,7 +49,7 @@ const App: React.FC = () => {
   // ---- Socket lifecycle ---------------------------------------
   useEffect(() => {
     mountedRef.current = true;
-    const socket = createSocket();
+    const socket = createSocket(dispatch);
     socketRef.current = socket;
 
     // ---- Connection events ------------------------------------
