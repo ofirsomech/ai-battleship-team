@@ -392,6 +392,7 @@ export function registerHandlers(io: TypedServer): void {
         updated = {
           ...updated,
           players: [...updated.players, aiPlayer],
+          phase: "placement", // transition to placement now that both players are in
         };
 
         setRoom(roomCode, updated);

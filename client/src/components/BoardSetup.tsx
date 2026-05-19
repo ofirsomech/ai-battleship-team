@@ -12,9 +12,11 @@ import ShipPalette from "./ShipPalette";
 interface BoardSetupProps {
   ownBoard: BoardType;
   opponentReady: boolean;
+  error: string | null;
   onPlaceShips: (ships: ShipPlacement[]) => void;
   onRandomize: (callback: (placements: ShipPlacement[]) => void) => void;
   onReady: () => void;
+  onClearError: () => void;
 }
 
 const SHIP_TYPES: ShipType[] = [
@@ -97,6 +99,8 @@ const BoardSetup: React.FC<BoardSetupProps> = ({
   onRandomize,
   onReady,
   opponentReady,
+  error,
+  onClearError,
 }) => {
   const [placingShip, setPlacingShip] = useState<ShipType | null>(null);
   const [orientation, setOrientation] = useState<Orientation>("horizontal");
@@ -361,6 +365,18 @@ const BoardSetup: React.FC<BoardSetupProps> = ({
               >
                 CLICK BOARD OR PRESS R TO ROTATE • ESC TO CANCEL
               </span>
+            </div>
+          )}
+
+          {/* Error display */}
+          {error && (
+            <div
+              className="text-center border px-4 py-3 text-sm toast-error cursor-pointer"
+              onClick={onClearError}
+              role="alert"
+            >
+              ⚠ {error}
+              <span className="block text-xs mt-1 opacity-70">(click to dismiss)</span>
             </div>
           )}
 

@@ -296,9 +296,11 @@ const App: React.FC = () => {
         <BoardSetup
           ownBoard={state.ownBoard}
           opponentReady={!!state.notice}
+          error={state.error}
           onPlaceShips={handlePlaceShips}
           onRandomize={handleRandomize}
           onReady={handleReady}
+          onClearError={handleClearError}
         />
       )}
 
