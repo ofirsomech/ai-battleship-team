@@ -3,239 +3,673 @@
 @tailwind utilities;
 
 /* ================================================================
-   Theme Tokens — Navy / Battleship color palette
+   Theme Tokens — Battle-Worn Naval Chart
    ================================================================ */
 
 :root {
-  --color-navy-900: #0f172a;
-  --color-navy-800: #1e293b;
-  --color-navy-700: #334155;
-  --color-navy-600: #475569;
+  /* Brass / Copper — primary accent */
+  --color-brass: #c9a84c;
+  --color-brass-dim: #8b7735;
+  --color-brass-glow: #e6c860;
+  --color-copper: #b87333;
+  --color-copper-dim: #7a4a24;
 
-  --color-grid-bg: #1e293b;
-  --color-grid-border: #475569;
-  --color-cell-empty: #1e293b;
-  --color-cell-hover: #334155;
-  --color-ship-blue: #2563eb;
-  --color-ship-border: #60a5fa;
-  --color-hit-red: #dc2626;
-  --color-hit-border: #f87171;
-  --color-sunk-bg: #7f1d1d;
-  --color-sunk-border: #ef4444;
-  --color-miss-bg: #4b5563;
+  /* Radar / Sonar */
+  --color-radar-green: #39ff14;
+  --color-radar-green-dim: #1a7a08;
+  --color-sonar-blue: #00bfff;
+  --color-sonar-blue-dim: #005f7f;
 
-  --color-success: #16a34a;
-  --color-warning: #ca8a04;
-  --color-danger: #dc2626;
-  --color-info: #2563eb;
+  /* Navy depths */
+  --color-navy-deep: #050d1a;
+  --color-navy-base: #0a1628;
+  --color-navy-surface: #0f1f3a;
+  --color-navy-panel: #122544;
+  --color-navy-grid: #1a3355;
+
+  /* Warm grays */
+  --color-warm-gray: #8b8a7e;
+  --color-warm-gray-dim: #5c5b52;
+  --color-warm-gray-bright: #b8b7a8;
 }
 
 /* ---- Base ---------------------------------------------------- */
 body {
-  @apply bg-gray-900 text-gray-100 font-mono overflow-x-hidden;
+  @apply text-gray-100 font-sans overflow-x-hidden;
   margin: 0;
+  background-color: var(--color-navy-deep);
+  position: relative;
+  isolation: isolate;
+}
+
+/* Grain + vignette overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(
+      ellipse at 50% 50%,
+      transparent 40%,
+      rgba(0, 0, 0, 0.55) 100%
+    ),
+    radial-gradient(
+      ellipse at 20% 80%,
+      rgba(201, 168, 76, 0.03) 0%,
+      transparent 50%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.008) 2px,
+      rgba(255, 255, 255, 0.008) 4px
+    );
+}
+
+/* Radar sweep — rotating gradient line across the body */
+body::after {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  pointer-events: none;
+  width: 200vmax;
+  height: 200vmax;
+  transform: translate(-50%, -50%);
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 330deg,
+    rgba(57, 255, 20, 0.06) 340deg,
+    rgba(57, 255, 20, 0.15) 350deg,
+    rgba(57, 255, 20, 0.30) 357deg,
+    rgba(57, 255, 20, 0.08) 360deg
+  );
+  animation: radar-sweep 4s linear infinite;
+}
+
+/* Suppress sweep on battle/game screens — background only in lobby */
+body.battle-active::after {
+  display: none;
 }
 
 /* ================================================================
    Keyframe Animations
    ================================================================ */
 
-/* Pulse animation for hit cells — subtle red glow */
-@keyframes pulse-hit {
+/* Radar sweep: rotating gradient line */
+@keyframes radar-sweep {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Sonar ping: expanding ring */
+@keyframes sonar-ping {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(57, 255, 20, 0.7),
+      0 0 4px 2px inset rgba(57, 255, 20, 0.3);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow:
+      0 0 6px 4px rgba(57, 255, 20, 0.3),
+      0 0 0 6px rgba(57, 255, 20, 0),
+      0 0 3px 1px inset rgba(57, 255, 20, 0.5);
+  }
+  100% {
+    box-shadow:
+      0 0 0 0 rgba(57, 255, 20, 0),
+      0 0 0 12px rgba(57, 255, 20, 0),
+      0 0 2px 1px inset rgba(57, 255, 20, 0.2);
+    transform: scale(1.02);
+  }
+}
+
+/* Stamp reveal: text appears with scale + opacity */
+@keyframes stamp-reveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+    filter: blur(2px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.04);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+}
+
+/* Sunk cell: brass border pulse */
+@keyframes sunk-brass {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6);
+    border-color: var(--color-brass-dim);
+    box-shadow: 0 0 2px 1px rgba(201, 168, 76, 0.15);
   }
   50% {
-    box-shadow: 0 0 6px 2px rgba(220, 38, 38, 0.3);
+    border-color: var(--color-brass);
+    box-shadow: 0 0 6px 2px rgba(201, 168, 76, 0.35);
   }
 }
 
-/* Sunk reveal animation — border highlight sweep */
-@keyframes sunk-reveal {
-  0% {
-    border-color: #ef4444;
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-  }
-  50% {
-    border-color: #fca5a5;
-    box-shadow: 0 0 8px 2px rgba(239, 68, 68, 0.4);
-  }
+/* Brass glow pulse for headings */
+@keyframes brass-glow {
+  0%,
   100% {
-    border-color: #ef4444;
-    box-shadow: 0 0 4px 1px rgba(239, 68, 68, 0.2);
+    text-shadow: 0 0 8px rgba(201, 168, 76, 0.2);
+  }
+  50% {
+    text-shadow: 0 0 18px rgba(201, 168, 76, 0.45);
   }
 }
 
-/* ---- Cell Styles --------------------------------------------- */
+/* Gauge needle pulse */
+@keyframes gauge-pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Cross-fade for miss marks */
+@keyframes miss-fade {
+  from {
+    opacity: 0;
+    transform: scale(0.5) rotate(-15deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* ================================================================
+   Cell Styles
+   ================================================================ */
+
 .cell {
   @apply w-[clamp(24px,6vw,44px)] h-[clamp(24px,6vw,44px)]
-         border border-gray-600 flex items-center justify-center
+         flex items-center justify-center
          text-[clamp(10px,2vw,14px)] font-bold cursor-default select-none
-         transition-colors duration-150;
+         transition-all duration-200;
+  border: 1px solid var(--color-navy-grid);
+  background: var(--color-navy-surface);
+  font-family: "DM Mono", monospace;
+  position: relative;
+}
+
+.cell::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  pointer-events: none;
 }
 
 .cell.empty {
-  @apply bg-gray-800 hover:bg-gray-700;
+  background: var(--color-navy-surface);
+}
+.cell.empty:hover {
+  background: var(--color-navy-panel);
 }
 
 .cell.ship {
-  @apply bg-blue-600 border-blue-400;
+  background: linear-gradient(135deg, #1a3a5c 0%, #0f2a44 100%);
+  border-color: var(--color-sonar-blue-dim);
 }
 
-/* Hit: red bg + pulse animation */
+/* Hit: radar-green glow + sonar ping animation */
 .cell.hit {
-  @apply bg-red-600 border-red-400 text-white;
-  animation: pulse-hit 1.2s ease-in-out infinite;
+  background: radial-gradient(ellipse at center, #2a4a1a 0%, #1a2a0a 100%);
+  border-color: var(--color-radar-green);
+  color: var(--color-radar-green);
+  animation: sonar-ping 1.6s ease-out infinite;
+  text-shadow: 0 0 6px var(--color-radar-green-dim);
+  font-family: "Crimson Text", serif;
 }
 
 .cell.miss {
-  @apply bg-gray-600 text-gray-400;
+  background: linear-gradient(135deg, #1a1f2a 0%, #141a24 100%);
+  border-color: var(--color-warm-gray-dim);
+  color: var(--color-warm-gray);
+  animation: miss-fade 0.3s ease-out;
 }
 
-/* Sunk: dark red bg, distinct border + crossed-out V + sunk-reveal animation */
+/* Sunk: brass border flash + dark copper fill */
 .cell.sunk {
-  @apply bg-red-950 border-red-500 text-white line-through;
-  animation: sunk-reveal 1.5s ease-in-out infinite;
+  background: linear-gradient(135deg, #2a1a0a 0%, #1a1005 100%);
+  border: 2px solid var(--color-brass-dim);
+  color: var(--color-brass);
+  animation: sunk-brass 2s ease-in-out infinite;
+  text-shadow: 0 0 6px rgba(201, 168, 76, 0.4);
+  font-family: "Crimson Text", serif;
 }
 
 /* Tracking board clickable cells */
 .cell.shootable {
-  @apply cursor-crosshair;
+  cursor: crosshair;
 }
 
 .cell.shootable.empty:not(.hit):not(.miss):not(.sunk):hover {
-  @apply bg-gray-600 ring-1 ring-yellow-400;
+  border-color: var(--color-brass-dim);
+  background: var(--color-navy-panel);
+  box-shadow: 0 0 6px rgba(201, 168, 76, 0.15);
 }
 
 /* Placement board drop zones */
 .cell.drop-target {
-  @apply cursor-pointer;
+  cursor: pointer;
 }
 
 .cell.drop-target.empty:hover {
-  @apply bg-blue-800 ring-1 ring-blue-400;
+  background: var(--color-navy-panel);
+  border-color: var(--color-sonar-blue-dim);
+  box-shadow: 0 0 6px rgba(0, 191, 255, 0.12);
 }
 
 .cell.drag-over {
-  @apply bg-blue-700 ring-2 ring-yellow-400;
+  background: #1a3a5c;
+  border-color: var(--color-brass);
+  box-shadow: 0 0 10px rgba(201, 168, 76, 0.25);
 }
 
 .cell.placing-preview {
-  @apply bg-blue-600 opacity-50;
+  background: rgba(0, 191, 255, 0.12);
+  border-color: var(--color-sonar-blue-dim);
 }
 
-/* ---- Ship Palette -------------------------------------------- */
+/* ---- Ship on Own Board during Battle ------------------------- */
+.cell.ship-revealed {
+  background: linear-gradient(135deg, #1a3a5c 0%, #0f2a44 100%);
+  border-color: var(--color-sonar-blue);
+}
+
+/* ================================================================
+   Ship Palette
+   ================================================================ */
+
 .ship-palette-item {
-  @apply flex items-center gap-1 p-2 rounded cursor-grab bg-blue-800
-         hover:bg-blue-700 active:cursor-grabbing transition-colors
+  @apply flex items-center gap-1 p-2 rounded cursor-grab
          min-h-[44px] min-w-[44px];
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border: 2px solid var(--color-brass-dim);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+}
+
+.ship-palette-item:hover:not(.placed) {
+  border-color: var(--color-brass);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 2px 8px rgba(201, 168, 76, 0.15);
+}
+
+.ship-palette-item:active:not(.placed) {
+  cursor: grabbing;
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.02),
+    0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .ship-palette-item.placed {
-  @apply opacity-40 cursor-not-allowed bg-gray-700;
+  @apply opacity-40 cursor-not-allowed;
+  background: linear-gradient(180deg, #1a1f2a 0%, #141a24 100%);
+  border-color: var(--color-warm-gray-dim);
 }
 
 .ship-segment {
-  @apply w-[clamp(20px,5vw,32px)] h-[clamp(20px,5vw,32px)]
-         border border-blue-400 bg-blue-600 rounded-sm;
+  @apply w-[clamp(20px,5vw,32px)] h-[clamp(20px,5vw,32px)] rounded-sm;
+  border: 1px solid var(--color-sonar-blue-dim);
+  background: linear-gradient(135deg, #1a3a5c 0%, #0f2a44 100%);
 }
 
-/* ---- Turn Indicator ------------------------------------------ */
+/* ================================================================
+   Turn Indicator — Gauge Style
+   ================================================================ */
+
 .turn-indicator {
-  @apply px-4 py-2 rounded-lg text-lg font-bold text-center transition-colors duration-300;
+  @apply px-5 py-3 text-lg font-bold text-center transition-all duration-500;
+  font-family: "Crimson Text", serif;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  position: relative;
+  min-width: 220px;
 }
 
 .turn-indicator.my-turn {
-  @apply bg-green-700 text-white animate-pulse;
+  background: linear-gradient(180deg, #1a2a0a 0%, #0f1a05 100%);
+  border: 2px solid var(--color-radar-green);
+  box-shadow:
+    0 0 12px rgba(57, 255, 20, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  color: var(--color-radar-green);
+  text-shadow: 0 0 8px var(--color-radar-green-dim);
+  animation: gauge-pulse 2s ease-in-out infinite;
+}
+
+.turn-indicator.my-turn::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-radar-green);
+  box-shadow: 0 0 8px var(--color-radar-green);
 }
 
 .turn-indicator.opponent-turn {
-  @apply bg-gray-700 text-gray-300;
+  background: linear-gradient(180deg, #1a1f2a 0%, #10141e 100%);
+  border: 2px solid var(--color-warm-gray-dim);
+  color: var(--color-warm-gray);
 }
 
-/* ---- Game Over Modal ----------------------------------------- */
+/* Game Over indicator */
+.turn-indicator.game-over {
+  background: linear-gradient(180deg, #2a1f0a 0%, #1a1405 100%);
+  border: 2px solid var(--color-brass-dim);
+  color: var(--color-brass);
+  text-shadow: 0 0 8px rgba(201, 168, 76, 0.3);
+}
+
+/* ================================================================
+   Game Over Modal — Brass Frame
+   ================================================================ */
+
 .game-over-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4;
+  @apply fixed inset-0 flex items-center justify-center z-50 p-4;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(5, 13, 26, 0.9) 100%
+  );
+  backdrop-filter: blur(4px);
 }
 
 .game-over-modal {
-  @apply bg-gray-800 rounded-xl p-6 sm:p-8 max-w-[90vw] max-h-[90vh] overflow-auto
-         w-full text-center shadow-2xl border border-gray-600;
+  @apply p-6 sm:p-8 max-w-[90vw] max-h-[90vh] overflow-auto w-full text-center;
+  background: linear-gradient(180deg, var(--color-navy-panel) 0%, var(--color-navy-base) 100%);
+  border: 3px solid var(--color-brass-dim);
+  box-shadow:
+    0 0 0 2px var(--color-navy-deep),
+    0 0 0 5px rgba(201, 168, 76, 0.1),
+    0 0 40px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  position: relative;
 }
 
-/* ---- Board Layout -------------------------------------------- */
+.game-over-modal::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(201, 168, 76, 0.08);
+  pointer-events: none;
+}
+
+.game-over-modal h2 {
+  font-family: "Crimson Text", serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* ================================================================
+   Board Layout
+   ================================================================ */
+
 .board-container {
   @apply flex flex-col items-center gap-2;
 }
 
 .board-label {
-  @apply text-sm text-gray-400 font-semibold uppercase tracking-wider;
+  font-family: "Crimson Text", serif;
+  font-weight: 600;
+  @apply text-sm font-semibold uppercase tracking-[0.2em];
+  color: var(--color-brass-dim);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  animation: stamp-reveal 0.6s ease-out;
 }
 
 .board-coordinates-row {
   @apply flex;
 }
 
-/* Coordinate labels: a-j columns, centered over each cell */
+/* Coordinate labels: a-j columns */
 .board-coordinate-label {
-  @apply w-[clamp(24px,6vw,44px)] h-6 flex items-center justify-center
-         text-[clamp(8px,1.5vw,12px)] text-gray-500 uppercase;
+  @apply w-[clamp(24px,6vw,44px)] h-5 flex items-center justify-center
+         text-[clamp(8px,1.5vw,11px)] uppercase;
+  font-family: "DM Mono", monospace;
+  color: var(--color-brass-dim);
+  letter-spacing: 0.05em;
+  font-weight: 400;
 }
 
 .board-row {
   @apply flex;
 }
 
-/* Row labels: 1-10, aligned to the left of each row */
+/* Row labels: 1-10 */
 .row-label {
   @apply w-6 h-[clamp(24px,6vw,44px)] flex items-center justify-center
-         text-[clamp(8px,1.5vw,12px)] text-gray-500;
+         text-[clamp(8px,1.5vw,11px)];
+  font-family: "DM Mono", monospace;
+  color: var(--color-brass-dim);
+  letter-spacing: 0.05em;
+  font-weight: 400;
 }
 
-/* ---- Ship on Own Board during Battle ------------------------- */
-.cell.ship-revealed {
-  @apply bg-blue-700 border-blue-500;
-}
+/* ================================================================
+   Action Buttons (utility classes)
+   ================================================================ */
 
-/* ---- Action Buttons (utility classes for non-UI-component usage) ---- */
 .btn {
-  @apply px-4 py-2 rounded font-semibold transition-colors duration-150
-         disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply px-4 py-2 font-semibold transition-all duration-200
+         disabled:opacity-40 disabled:cursor-not-allowed;
+  font-family: "Crimson Text", serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border: 2px solid var(--color-brass-dim);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+  color: var(--color-warm-gray-bright);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--color-brass);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 2px 8px rgba(201, 168, 76, 0.2);
+  color: var(--color-brass-glow);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.02),
+    0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .btn-primary {
-  @apply bg-blue-600 hover:bg-blue-500 text-white;
+  border-color: var(--color-brass);
+  color: var(--color-brass);
+  background: linear-gradient(180deg, #2a2415 0%, #1a180a 100%);
+  text-shadow: 0 0 8px rgba(201, 168, 76, 0.2);
+}
+.btn-primary:hover:not(:disabled) {
+  border-color: var(--color-brass-glow);
+  color: var(--color-brass-glow);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 2px 12px rgba(201, 168, 76, 0.3);
 }
 
 .btn-danger {
-  @apply bg-red-600 hover:bg-red-500 text-white;
+  border-color: var(--color-copper-dim);
+  color: var(--color-copper);
+  background: linear-gradient(180deg, #2a1a15 0%, #1a0f0a 100%);
+}
+.btn-danger:hover:not(:disabled) {
+  border-color: var(--color-copper);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 2px 12px rgba(184, 115, 51, 0.25);
 }
 
 .btn-success {
-  @apply bg-green-600 hover:bg-green-500 text-white;
+  border-color: var(--color-radar-green-dim);
+  color: var(--color-radar-green);
+  background: linear-gradient(180deg, #152a15 0%, #0a1a0a 100%);
+}
+.btn-success:hover:not(:disabled) {
+  border-color: var(--color-radar-green);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 2px 12px rgba(57, 255, 20, 0.2);
 }
 
 .btn-secondary {
-  @apply bg-gray-600 hover:bg-gray-500 text-white;
+  border-color: var(--color-brass-dim);
+  color: var(--color-warm-gray-bright);
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+}
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--color-brass);
 }
 
-/* ---- Input --------------------------------------------------- */
+/* ================================================================
+   Input
+   ================================================================ */
+
 .input {
-  @apply bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-100
-         focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono uppercase;
+  @apply px-3 py-2 font-mono uppercase;
+  background: var(--color-navy-deep);
+  border: 2px solid var(--color-brass-dim);
+  color: var(--color-warm-gray-bright);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+  font-family: "DM Mono", monospace;
+  letter-spacing: 0.1em;
 }
 
-/* ---- Key Hint ------------------------------------------------ */
+.input:focus {
+  outline: none;
+  border-color: var(--color-brass);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.4),
+    0 0 8px rgba(201, 168, 76, 0.15);
+}
+
+.input::placeholder {
+  color: var(--color-warm-gray-dim);
+  letter-spacing: 0.05em;
+}
+
+/* ================================================================
+   Helpers
+   ================================================================ */
+
 .key-hint {
-  @apply text-xs text-gray-500 mt-1;
+  font-family: "DM Mono", monospace;
+  @apply text-xs mt-1;
+  color: var(--color-warm-gray-dim);
 }
 
-/* ---- Placement ships list ------------------------------------ */
 .placed-ship {
-  @apply flex items-center gap-2 px-3 py-1 rounded bg-gray-700 text-sm;
+  @apply flex items-center gap-2 px-3 py-1 rounded text-sm;
+  background: var(--color-navy-panel);
+  border: 1px solid var(--color-brass-dim);
+  color: var(--color-warm-gray);
 }
 
 .placed-ship.ready {
-  @apply bg-green-800;
+  border-color: var(--color-radar-green-dim);
+  color: var(--color-radar-green);
+}
+
+/* Toast variants */
+.toast-error {
+  background: linear-gradient(180deg, #2a1a15 0%, #1a0f0a 100%);
+  border-color: var(--color-copper-dim);
+  color: #e8b8a0;
+}
+.toast-success {
+  background: linear-gradient(180deg, #152a15 0%, #0a1a0a 100%);
+  border-color: var(--color-radar-green-dim);
+  color: var(--color-radar-green);
+}
+.toast-info {
+  background: linear-gradient(180deg, #15202a 0%, #0a1520 100%);
+  border-color: var(--color-sonar-blue-dim);
+  color: var(--color-sonar-blue);
+}
+
+/* Hr / divider */
+hr.brass-rule {
+  border: none;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-brass-dim) 20%,
+    var(--color-brass-dim) 80%,
+    transparent 100%
+  );
+}
+
+/* Panel / card */
+.panel {
+  background: linear-gradient(180deg, var(--color-navy-panel) 0%, var(--color-navy-base) 100%);
+  border: 2px solid var(--color-brass-dim);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Stamped heading */
+.heading-stamped {
+  font-family: "Crimson Text", serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(201, 168, 76, 0.1);
+  animation: stamp-reveal 0.7s ease-out;
+}
+
+/* Section header with small-caps */
+.section-header {
+  font-family: "Crimson Text", serif;
+  font-weight: 600;
+  font-variant: small-caps;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--color-brass-dim);
 }

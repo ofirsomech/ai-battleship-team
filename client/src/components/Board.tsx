@@ -1,5 +1,5 @@
 // ============================================================
-// Board.tsx — Reusable 10×10 grid (own board + tracking board)
+// Board.tsx — Reusable 10×10 grid with naval-chart styling
 // ============================================================
 
 import React from "react";
