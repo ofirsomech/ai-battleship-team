@@ -63,10 +63,11 @@ class BattleshipAgent:
                 "Use hunt-and-target: if any cell shows a hit with the ship not sunk, "
                 "target adjacent cells (up, down, left, right) first. "
                 "If no active hits, use a checkerboard pattern to maximize coverage. "
-                "Return ONLY a JSON object with the coordinate: {\"col\": \"a\", \"row\": 1}\n"
+                "First write 1-2 sentences of tactical reasoning explaining your choice. "
+                "Then on the LAST LINE output ONLY the JSON: {\"col\": \"a\", \"row\": 1}\n"
                 "Column must be a single letter a-j. Row must be a number 1-10."
             ),
-            expected_output='{"col": "a", "row": 1}',
+            expected_output='Tactical reasoning here. {"col": "a", "row": 1}',
             agent=agent,
         )
 
@@ -81,10 +82,13 @@ class BattleshipAgent:
         coordinate = self._parse_coordinate(str(result))
 
         # Extract reasoning from the CrewAI result
-        thinking = ""
-        if hasattr(result, 'tasks_output') and result.tasks_output:
-            thinking = str(result.tasks_output[0]) if result.tasks_output else ""
-        if not thinking:
+        raw = str(result.tasks_output[0]) if hasattr(result, 'tasks_output') and result.tasks_output else ""
+        json_start = raw.find("{")
+        if json_start > 0:
+            thinking = raw[:json_start].strip()
+        else:
+            thinking = raw.strip()
+        if not thinking or len(thinking) < 10:
             thinking = "Analyzing board patterns for optimal targeting..."
 
         return {"coordinate": coordinate, "thinking": thinking}
