@@ -1,6 +1,6 @@
 // ============================================================
-// IconHit.tsx — Red "V" icon with pulse animation for hit cells
-// Per docs/game_spec.md §6: Hit = V on red background
+// IconHit.tsx — Radar-green "V" with sonar ping for hit cells
+// Per docs/game_spec.md §6: Hit = V on radar-green
 // ============================================================
 
 import React from "react";
@@ -13,10 +13,11 @@ interface IconHitProps {
 const IconHit: React.FC<IconHitProps> = ({ className = "" }) => {
   return (
     <span
-      className={`inline-flex items-center justify-center w-full h-full font-bold text-white select-none ${className}`}
+      className={`inline-flex items-center justify-center w-full h-full font-bold select-none font-['Crimson_Text'] text-[var(--color-radar-green)] ${className}`}
+      style={{ textShadow: "0 0 6px var(--color-radar-green-dim)" }}
       aria-label="Hit"
     >
-      <span className="animate-pulse-hit">V</span>
+      V
     </span>
   );
 };

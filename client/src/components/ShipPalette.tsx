@@ -1,5 +1,5 @@
 // ============================================================
-// ShipPalette.tsx — Draggable ship palette for placement phase
+// ShipPalette.tsx — Riveted-metal draggable ship palette
 // ============================================================
 
 import React from "react";
@@ -30,14 +30,21 @@ const ShipPalette: React.FC<ShipPaletteProps> = ({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">
+        <h3
+          className="text-sm font-semibold uppercase tracking-[0.2em]"
+          style={{
+            fontFamily: "'Crimson Text', serif",
+            fontVariant: "small-caps",
+            color: "var(--color-brass-dim)",
+          }}
+        >
           Ships to Place
         </h3>
         <button
           className="btn btn-secondary text-xs px-3 py-2 min-h-[44px] w-full sm:w-auto"
           onClick={onRotate}
         >
-          Rotate (R) — {currentOrientation === "horizontal" ? "→" : "↓"}
+          ROTATE (R) — {currentOrientation === "horizontal" ? "→" : "↓"}
         </button>
       </div>
 
@@ -61,7 +68,17 @@ const ShipPalette: React.FC<ShipPaletteProps> = ({
                 e.dataTransfer.effectAllowed = "move";
               }}
             >
-              <span className="text-xs font-bold w-24">{shipType}</span>
+              <span
+                className="text-xs font-bold w-24 uppercase tracking-[0.08em]"
+                style={{
+                  fontFamily: "'Crimson Text', serif",
+                  color: isPlaced
+                    ? "var(--color-warm-gray-dim)"
+                    : "var(--color-warm-gray-bright)",
+                }}
+              >
+                {shipType}
+              </span>
               <div
                 className={`flex gap-1 ${currentOrientation === "vertical" ? "flex-col" : ""}`}
               >
@@ -75,7 +92,7 @@ const ShipPalette: React.FC<ShipPaletteProps> = ({
       </div>
 
       <p className="key-hint">
-        Click a ship then click the board to place • Press R to rotate
+        CLICK SHIP THEN CLICK BOARD • PRESS R TO ROTATE
       </p>
     </div>
   );

@@ -1,5 +1,5 @@
 // ============================================================
-// Game.tsx — Battle phase: OwnBoard + TrackingBoard + TurnIndicator
+// Game.tsx — Battle phase with naval styling
 // ============================================================
 
 import React, { useCallback } from "react";
@@ -46,7 +46,16 @@ const Game: React.FC<GameProps> = ({
 
   return (
     <div className="min-h-screen flex flex-col items-center gap-6 py-8 px-4">
-      <h1 className="text-2xl font-bold text-blue-400">⚓ Battle!</h1>
+      <h1
+        className="text-2xl font-bold tracking-[0.2em] animate-stamp-reveal"
+        style={{
+          fontFamily: "'Crimson Text', serif",
+          color: "var(--color-brass)",
+          textShadow: "0 2px 4px rgba(0,0,0,0.6), 0 0 20px rgba(201,168,76,0.15)",
+        }}
+      >
+        ⚓ BATTLE STATIONS
+      </h1>
 
       {/* Turn Indicator */}
       <TurnIndicator
@@ -58,12 +67,32 @@ const Game: React.FC<GameProps> = ({
 
       {/* Player labels */}
       <div className="flex gap-16 text-sm">
-        <span className="text-blue-400 font-semibold">
-          {playerName ?? "You"}
+        <span
+          className="font-semibold tracking-[0.1em] uppercase"
+          style={{
+            fontFamily: "'Crimson Text', serif",
+            color: "var(--color-sonar-blue)",
+          }}
+        >
+          {playerName ?? "YOU"}
         </span>
-        <span className="text-gray-500">vs</span>
-        <span className="text-red-400 font-semibold">
-          {opponentName ?? "Opponent"}
+        <span
+          className="uppercase tracking-[0.3em]"
+          style={{
+            fontFamily: "'DM Mono', monospace",
+            color: "var(--color-warm-gray-dim)",
+          }}
+        >
+          VS
+        </span>
+        <span
+          className="font-semibold tracking-[0.1em] uppercase"
+          style={{
+            fontFamily: "'Crimson Text', serif",
+            color: "var(--color-copper)",
+          }}
+        >
+          {opponentName ?? "ENEMY"}
         </span>
       </div>
 
@@ -86,24 +115,58 @@ const Game: React.FC<GameProps> = ({
 
       {/* Error */}
       {error && (
-        <div className="bg-red-900 border border-red-600 rounded-lg px-4 py-2 text-sm text-red-200 max-w-sm text-center">
+        <div className="toast-error max-w-sm text-center border px-4 py-2 text-sm">
           {error}
         </div>
       )}
 
       {/* Legend */}
-      <div className="flex gap-6 text-xs text-gray-400">
+      <div
+        className="flex gap-6 text-xs tracking-[0.08em] uppercase"
+        style={{
+          fontFamily: "'DM Mono', monospace",
+          color: "var(--color-warm-gray)",
+        }}
+      >
         <span className="flex items-center gap-1">
-          <span className="inline-block w-4 h-4 bg-red-600 rounded-sm" /> Hit
+          <span
+            className="inline-block w-4 h-4 rounded-sm"
+            style={{
+              background: "radial-gradient(ellipse at center, #2a4a1a 0%, #1a2a0a 100%)",
+              border: "1px solid var(--color-radar-green)",
+            }}
+          />{" "}
+          HIT
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block w-4 h-4 bg-gray-600 rounded-sm" /> Miss
+          <span
+            className="inline-block w-4 h-4 rounded-sm"
+            style={{
+              background: "linear-gradient(135deg, #1a1f2a 0%, #141a24 100%)",
+              border: "1px solid var(--color-warm-gray-dim)",
+            }}
+          />{" "}
+          MISS
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block w-4 h-4 bg-blue-600 rounded-sm" /> Ship
+          <span
+            className="inline-block w-4 h-4 rounded-sm"
+            style={{
+              background: "linear-gradient(135deg, #1a3a5c 0%, #0f2a44 100%)",
+              border: "1px solid var(--color-sonar-blue-dim)",
+            }}
+          />{" "}
+          SHIP
         </span>
         <span className="flex items-center gap-1">
-          <span className="inline-block w-4 h-4 bg-red-900 rounded-sm" /> Sunk
+          <span
+            className="inline-block w-4 h-4 rounded-sm"
+            style={{
+              background: "linear-gradient(135deg, #2a1a0a 0%, #1a1005 100%)",
+              border: "2px solid var(--color-brass-dim)",
+            }}
+          />{" "}
+          SUNK
         </span>
       </div>
     </div>

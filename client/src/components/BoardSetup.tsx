@@ -1,5 +1,5 @@
 // ============================================================
-// BoardSetup.tsx — Ship placement phase (drag-and-drop, randomize, Ready)
+// BoardSetup.tsx — Ship placement with naval styling
 // ============================================================
 
 import React, { useState, useCallback, useEffect, useRef } from "react";
@@ -93,10 +93,10 @@ function removeShipFromBoard(board: BoardType, shipType: ShipType): BoardType {
 
 const BoardSetup: React.FC<BoardSetupProps> = ({
   ownBoard,
-  opponentReady,
   onPlaceShips,
   onRandomize,
   onReady,
+  opponentReady,
 }) => {
   const [placingShip, setPlacingShip] = useState<ShipType | null>(null);
   const [orientation, setOrientation] = useState<Orientation>("horizontal");
@@ -111,15 +111,12 @@ const BoardSetup: React.FC<BoardSetupProps> = ({
     // Rebuild placedShips from ownBoard
     const newPlaced = new Map<ShipType, ShipPlacement>();
     for (const shipType of SHIP_TYPES) {
-      // Find ship positions on board
       for (let row = 0; row < 10; row++) {
         for (let col = 0; col < 10; col++) {
           const cell = ownBoard.grid[row][col];
           if (cell.status === "ship" && cell.shipType === shipType) {
-            // Skip if already found for this ship type — record only the FIRST cell as start position
             if (newPlaced.has(shipType)) continue;
 
-            // Determine orientation by checking adjacent cell
             const isHorizontal =
               col < 9 && ownBoard.grid[row][col + 1]?.shipType === shipType;
             const isVertical =
@@ -163,7 +160,6 @@ const BoardSetup: React.FC<BoardSetupProps> = ({
     (shipType: ShipType, col: ColIndex, row: RowIndex) => {
       const newShips = new Map(placedShips);
 
-      // Remove previous placement of this ship type if exists
       if (newShips.has(shipType)) {
         newShips.delete(shipType);
       }
@@ -176,15 +172,12 @@ const BoardSetup: React.FC<BoardSetupProps> = ({
         };
         newShips.set(shipType, placement);
 
-        // Update the board
         let board = createEmptyBoard();
-        // Re-add all non-this-ship ships
         for (const [, p] of newShips) {
           if (p.shipType !== shipType) {
             board = placeShipOnBoard(board, p.shipType, p.start.col, p.start.row, p.orientation);
           }
         }
-        // Add this ship
         board = placeShipOnBoard(board, shipType, col, row, orientation);
         boardRef.current = board;
       }
@@ -214,7 +207,6 @@ const BoardSetup: React.FC<BoardSetupProps> = ({
       const shipType = e.dataTransfer.getData("shipType") as ShipType;
       if (!shipType) return;
 
-      // Calculate preview cells
       const length = SHIP_LENGTHS[shipType];
       const preview = new Set<string>();
       for (let i = 0; i < length; i++) {
@@ -310,19 +302,23 @@ const BoardSetup: React.FC<BoardSetupProps> = ({
 
   return (
     <div className="min-h-screen flex flex-col items-center gap-6 py-8 px-4">
-      <h1 className="text-2xl font-bold text-blue-400">⚓ Place Your Fleet</h1>
+      <h1
+        className="text-2xl font-bold tracking-[0.2em] animate-stamp-reveal"
+        style={{
+          fontFamily: "'Crimson Text', serif",
+          color: "var(--color-brass)",
+          textShadow: "0 2px 4px rgba(0,0,0,0.6), 0 0 20px rgba(201,168,76,0.15)",
+        }}
+      >
+        ⚓ DEPLOY FLEET
+      </h1>
 
       <div className="flex flex-col lg:flex-row gap-8 items-start">
         {/* Left: Own Board (placement area) */}
-        <div
-          onMouseMove={(e) => {
-            if (!placingShip) return;
-            // This is handled per-cell in Board
-          }}
-        >
+        <div>
           <Board
             board={boardRef.current}
-            label="Your Board"
+            label="Your Waters"
             showShips
             isPlacement
             previewCells={previewCells}
@@ -346,11 +342,25 @@ const BoardSetup: React.FC<BoardSetupProps> = ({
 
           {/* Placing hint */}
           {placingShip && (
-            <div className="bg-blue-900 border border-blue-600 rounded-lg px-4 py-2 text-sm text-blue-200 text-center">
-              Placing <strong>{placingShip}</strong> ({SHIP_LENGTHS[placingShip]} cells){" "}
-              {orientation === "horizontal" ? "horizontally" : "vertically"}
+            <div
+              className="text-center border px-4 py-2 text-sm toast-info"
+            >
+              DEPLOYING{" "}
+              <strong style={{ color: "var(--color-brass)" }}>
+                {placingShip.toUpperCase()}
+              </strong>{" "}
+              ({SHIP_LENGTHS[placingShip]} CELLS){" "}
+              {orientation === "horizontal" ? "—" : "|"}
               <br />
-              <span className="text-xs">Click a cell on the board or press R to rotate • Esc to cancel</span>
+              <span
+                className="text-xs"
+                style={{
+                  fontFamily: "'DM Mono', monospace",
+                  color: "var(--color-warm-gray)",
+                }}
+              >
+                CLICK BOARD OR PRESS R TO ROTATE • ESC TO CANCEL
+              </span>
             </div>
           )}
 
@@ -360,7 +370,7 @@ const BoardSetup: React.FC<BoardSetupProps> = ({
               className="btn btn-secondary w-full"
               onClick={handleRandomize}
             >
-              🎲 Randomize
+              🎲 RANDOMIZE
             </button>
 
             <button
@@ -368,14 +378,18 @@ const BoardSetup: React.FC<BoardSetupProps> = ({
               onClick={onReady}
               disabled={!allPlaced}
             >
-              {allPlaced ? "✅ Ready!" : `Place all ships (${placedShips.size}/5)`}
+              {allPlaced
+                ? "✅ READY"
+                : `PLACE ALL SHIPS (${placedShips.size}/5)`}
             </button>
           </div>
 
           {/* Opponent ready indicator */}
           {opponentReady && (
-            <div className="bg-green-900 border border-green-600 rounded-lg px-4 py-2 text-sm text-green-200 text-center">
-              ✅ Opponent is ready! Battle starts when you confirm.
+            <div
+              className="text-center border px-4 py-2 text-sm toast-success"
+            >
+              ✅ OPPONENT READY — BATTLE BEGINS ON YOUR CONFIRMATION
             </div>
           )}
         </div>

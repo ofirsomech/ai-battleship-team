@@ -1,5 +1,5 @@
 // ============================================================
-// Lobby.tsx — Create room / Join room screen
+// Lobby.tsx — Radar sweep background, stamped naval typography
 // ============================================================
 
 import React, { useState } from "react";
@@ -51,35 +51,84 @@ const Lobby: React.FC<LobbyProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-8 px-4">
-      <h1 className="text-4xl font-bold text-blue-400 tracking-wider">
+    <div className="min-h-screen flex flex-col items-center justify-center gap-8 px-4 relative overflow-hidden">
+      {/* Radar sweep overlay — local to lobby */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0"
+        style={{
+          background:
+            "conic-gradient(from 0deg, transparent 0deg, transparent 330deg, rgba(57,255,20,0.04) 340deg, rgba(57,255,20,0.10) 350deg, rgba(57,255,20,0.22) 357deg, rgba(57,255,20,0.05) 360deg)",
+          animation: "radar-sweep 4s linear infinite",
+        }}
+      />
+
+      {/* Center radar ring decoration */}
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0"
+        style={{
+          width: "min(80vmin, 600px)",
+          height: "min(80vmin, 600px)",
+          borderRadius: "50%",
+          border: "1px solid rgba(57,255,20,0.06)",
+          boxShadow: "0 0 60px 20px rgba(57,255,20,0.015)",
+        }}
+      />
+
+      <h1
+        className="text-4xl font-bold tracking-[0.25em] animate-stamp-reveal z-10 relative"
+        style={{
+          fontFamily: "'Crimson Text', serif",
+          color: "var(--color-brass)",
+          textShadow: "0 2px 6px rgba(0,0,0,0.7), 0 0 30px rgba(201,168,76,0.2)",
+        }}
+      >
         ⚓ BATTLESHIP
       </h1>
 
+      <p
+        className="text-xs tracking-[0.3em] -mt-4 z-10 relative"
+        style={{
+          fontFamily: "'DM Mono', monospace",
+          color: "var(--color-warm-gray-dim)",
+          textTransform: "uppercase",
+        }}
+      >
+        NAVAL COMMAND
+      </p>
+
       {!roomCode && !isJoining && (
-        <div className="flex flex-col items-center gap-6 w-full max-w-sm">
+        <div className="flex flex-col items-center gap-6 w-full max-w-sm z-10 relative">
           {/* Create Room */}
           <button
             className="btn btn-primary w-full text-lg py-3"
             onClick={handleCreateRoom}
           >
-            Create Room
+            CREATE ROOM
           </button>
 
           {/* Divider */}
           <div className="flex items-center gap-4 w-full">
-            <hr className="flex-1 border-gray-600" />
-            <span className="text-gray-500 text-sm">or join existing</span>
-            <hr className="flex-1 border-gray-600" />
+            <hr className="brass-rule flex-1" />
+            <span
+              className="text-sm tracking-[0.1em]"
+              style={{
+                fontFamily: "'Crimson Text', serif",
+                fontStyle: "italic",
+                color: "var(--color-warm-gray-dim)",
+              }}
+            >
+              or join existing
+            </span>
+            <hr className="brass-rule flex-1" />
           </div>
 
           {/* Join Room */}
           <div className="flex flex-col gap-3 w-full">
             <input
-              className="input text-center text-lg tracking-widest"
+              className="input text-center text-lg tracking-[0.3em]"
               type="text"
               maxLength={6}
-              placeholder="Room Code"
+              placeholder="ROOM CODE"
               value={joinCode}
               onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
               onKeyDown={handleKeyDown}
@@ -87,7 +136,7 @@ const Lobby: React.FC<LobbyProps> = ({
             <input
               className="input"
               type="text"
-              placeholder="Your Name"
+              placeholder="YOUR NAME"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -97,7 +146,7 @@ const Lobby: React.FC<LobbyProps> = ({
               onClick={handleJoinRoom}
               disabled={!joinCode.trim()}
             >
-              Join Room
+              JOIN ROOM
             </button>
           </div>
         </div>
@@ -105,20 +154,53 @@ const Lobby: React.FC<LobbyProps> = ({
 
       {/* Room Created — Waiting for opponent */}
       {roomCode && !isJoining && (
-        <div className="flex flex-col items-center gap-6 w-full max-w-sm">
-          <div className="bg-gray-800 rounded-lg p-6 text-center border border-gray-600 w-full">
-            <p className="text-sm text-gray-400 mb-2">Room Code</p>
-            <p className="text-4xl font-bold tracking-[0.5em] text-blue-400 mb-4">
+        <div className="flex flex-col items-center gap-6 w-full max-w-sm z-10 relative">
+          <div className="w-full p-6 text-center relative panel">
+            <p
+              className="text-sm mb-2 tracking-[0.15em] uppercase"
+              style={{
+                fontFamily: "'DM Mono', monospace",
+                color: "var(--color-warm-gray-dim)",
+              }}
+            >
+              Room Code
+            </p>
+            <p
+              className="text-4xl font-bold tracking-[0.4em] mb-4 animate-stamp-reveal"
+              style={{
+                fontFamily: "'DM Mono', monospace",
+                color: "var(--color-brass)",
+                textShadow: "0 0 12px rgba(201,168,76,0.3)",
+              }}
+            >
               {roomCode}
             </p>
-            <p className="text-sm text-gray-400">
-              Share this code with your opponent
+            <p
+              className="text-sm tracking-[0.05em]"
+              style={{
+                fontFamily: "'Crimson Text', serif",
+                fontStyle: "italic",
+                color: "var(--color-warm-gray)",
+              }}
+            >
+              Transmit this code to your opponent
             </p>
           </div>
 
-          <div className="flex items-center gap-2 text-gray-400">
-            <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse" />
-            <span>Waiting for opponent to join...</span>
+          <div className="flex items-center gap-3" style={{ color: "var(--color-brass)" }}>
+            <div
+              className="w-3 h-3 rounded-full animate-pulse"
+              style={{ backgroundColor: "var(--color-radar-green)" }}
+            />
+            <span
+              className="text-sm tracking-[0.08em]"
+              style={{
+                fontFamily: "'DM Mono', monospace",
+                color: "var(--color-warm-gray)",
+              }}
+            >
+              AWAITING OPPONENT...
+            </span>
           </div>
 
           {/* Copy button */}
@@ -128,35 +210,54 @@ const Lobby: React.FC<LobbyProps> = ({
               navigator.clipboard.writeText(roomCode).catch(() => {});
             }}
           >
-            📋 Copy Room Code
+            📋 COPY ROOM CODE
           </button>
         </div>
       )}
 
       {/* Joining */}
       {isJoining && (
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-400">Joining room {joinCode}...</p>
+        <div className="flex flex-col items-center gap-4 z-10 relative">
+          <div
+            className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin"
+            style={{
+              borderColor: "var(--color-brass-dim)",
+              borderTopColor: "transparent",
+            }}
+          />
+          <p
+            className="text-sm tracking-[0.1em]"
+            style={{
+              fontFamily: "'DM Mono', monospace",
+              color: "var(--color-warm-gray)",
+            }}
+          >
+            JOINING {joinCode}...
+          </p>
         </div>
       )}
 
       {/* Error */}
       {error && (
-        <div className="bg-red-900 border border-red-600 rounded-lg px-4 py-2 text-sm text-red-200 max-w-sm text-center">
+        <div
+          className="max-w-sm text-center border px-4 py-2 text-sm z-10 relative toast-error"
+        >
           {error}
           <button
-            className="block mx-auto mt-1 text-xs text-red-400 hover:text-red-300 underline"
+            className="block mx-auto mt-1 text-xs underline opacity-60 hover:opacity-100 transition-opacity"
             onClick={onClearError}
+            style={{ color: "var(--color-copper)" }}
           >
-            Dismiss
+            DISMISS
           </button>
         </div>
       )}
 
       {/* Notice */}
       {notice && (
-        <div className="bg-yellow-900 border border-yellow-600 rounded-lg px-4 py-2 text-sm text-yellow-200 max-w-sm text-center">
+        <div
+          className="max-w-sm text-center border px-4 py-2 text-sm z-10 relative toast-success"
+        >
           {notice}
         </div>
       )}

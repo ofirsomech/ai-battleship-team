@@ -1,5 +1,5 @@
 // ============================================================
-// App.tsx — Root component with phase-based routing + socket wiring
+// App.tsx — Root component with naval-themed connection bar
 // ============================================================
 
 import React, { useEffect, useReducer, useRef, useState, useCallback } from "react";
@@ -75,15 +75,12 @@ const App: React.FC = () => {
       if (!mountedRef.current) return;
       const myId = socket.id;
       if (data.playerId !== myId) {
-        // We are Player 1 (host) — the joining player is opponent
         dispatch({
           type: "PLAYER_JOINED",
           playerId: data.playerId,
           playerName: data.playerName,
         });
       } else {
-        // We are Player 2 (joiner) — transition to placement
-        // Opponent is the host (Player 1, hardcoded by server)
         dispatch({ type: "SET_PHASE", phase: "placement" });
       }
     });
@@ -154,7 +151,6 @@ const App: React.FC = () => {
     socket.on("lobbyNotice", (data) => {
       if (!mountedRef.current) return;
       dispatch({ type: "SET_NOTICE", notice: data.message });
-      // If opponent disconnected during placement/lobby → back to lobby
       if (phaseRef.current === "placement") {
         dispatch({ type: "SET_PHASE", phase: "lobby" });
       }
@@ -176,7 +172,6 @@ const App: React.FC = () => {
 
   const handlePlaceShips = useCallback((ships: ShipPlacement[]) => {
     socketRef.current?.emit("placeShips", { ships });
-    // Keep ownBoard in sync locally
     const board = buildBoardFromPlacements(ships);
     dispatch({ type: "SET_OWN_BOARD", board });
   }, []);
@@ -186,14 +181,11 @@ const App: React.FC = () => {
       const socket = socketRef.current;
       if (!socket) return;
 
-      // Socket.IO typed events don't include ack callbacks in the type.
-      // Use untyped emit to pass the callback as the second argument.
       (socket as unknown as { emit: (event: string, ...args: unknown[]) => void }).emit(
         "randomizeShips",
         (result: { placements: ShipPlacement[] }) => {
           if (!mountedRef.current) return;
           callback(result.placements);
-          // Keep ownBoard in sync
           const board = buildBoardFromPlacements(result.placements);
           dispatch({ type: "SET_OWN_BOARD", board });
         }
@@ -240,7 +232,6 @@ const App: React.FC = () => {
     if (!state.roomCode || !state.playerId) return;
 
     socket.connect();
-    // After reconnection, request reconnect from server
     sleep(300).then(() => {
       if (!mountedRef.current) return;
       socket.emit("requestReconnect", {
@@ -255,13 +246,21 @@ const App: React.FC = () => {
   const { phase } = state;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
+    <div
+      className="min-h-screen"
+      data-phase={phase}
+      data-winner={state.winner || ""}
+      style={{ backgroundColor: "var(--color-navy-deep)", color: "var(--color-warm-gray-bright)" }}
+    >
       {/* Connection status bar */}
       <div className="fixed top-0 left-0 right-0 h-1 z-50">
         <div
-          className={`h-full transition-colors ${
-            state.isConnected ? "bg-green-500" : "bg-red-500"
-          }`}
+          className="h-full transition-colors"
+          style={{
+            backgroundColor: state.isConnected
+              ? "var(--color-radar-green)"
+              : "var(--color-copper)",
+          }}
         />
       </div>
 
@@ -307,7 +306,7 @@ const App: React.FC = () => {
       )}
 
       {/* Game Over Modal */}
-      {phase === "gameOver" && (
+      {(phase === "gameOver" || !!state.winner) && (
         <GameOverModal
           winner={state.winner!}
           myPlayerId={state.playerId}
@@ -326,13 +325,13 @@ const App: React.FC = () => {
             className="btn btn-secondary text-xs"
             onClick={() => socketRef.current?.disconnect()}
           >
-            Disconnect
+            DISCONNECT
           </button>
           <button
             className="btn btn-secondary text-xs"
             onClick={handleReconnect}
           >
-            Reconnect
+            RECONNECT
           </button>
         </div>
       )}

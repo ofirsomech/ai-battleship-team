@@ -1,5 +1,5 @@
 // ============================================================
-// ShipBlock.tsx — Dumb ship segment block for palette & board
+// ShipBlock.tsx — Ship segment block (riveted metal style)
 // Used in ShipPalette (draggable) and on the own board (ship display)
 // ============================================================
 
@@ -27,12 +27,12 @@ const ShipBlock: React.FC<ShipBlockProps> = ({
   size = "md",
   className = "",
 }) => {
-  let colorClasses = "bg-blue-600 border-blue-400";
+  let colorClasses = "border-[var(--color-sonar-blue-dim)] bg-gradient-to-br from-[#1a3a5c] to-[#0f2a44]";
 
   if (isSunk) {
-    colorClasses = "bg-red-900 border-red-500 animate-sunk-reveal";
+    colorClasses = "border-[var(--color-brass)] bg-gradient-to-br from-[#2a1a0a] to-[#1a1005] animate-sunk-brass";
   } else if (isHit) {
-    colorClasses = "bg-red-600 border-red-400";
+    colorClasses = "border-[var(--color-radar-green)] bg-gradient-to-br from-[#2a4a1a] to-[#1a2a0a] animate-sonar-ping";
   }
 
   return (

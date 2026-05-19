@@ -1,5 +1,6 @@
 // ============================================================
-// Cell.tsx — Individual grid cell with hit/miss/sunk states
+// Cell.tsx — Grid cell with battle-worn naval styling
+// Radar-green hits, warm-gray misses, brass sunk
 // ============================================================
 
 import React from "react";
@@ -31,7 +32,7 @@ const Cell: React.FC<CellProps> = ({
   col,
   row,
   status,
-  shipType,
+  shipType: _shipType,
   hasShip,
   isShootable,
   isDropTarget,
@@ -75,7 +76,7 @@ const Cell: React.FC<CellProps> = ({
   if (status === "hit") {
     display = "V";
   } else if (status === "miss") {
-    display = "x";
+    display = "✕";
   } else if (status === "sunk") {
     display = "V";
   }

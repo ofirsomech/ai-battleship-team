@@ -1,5 +1,5 @@
 // ============================================================
-// TurnIndicator.tsx — Shows whose turn it is during battle
+// TurnIndicator.tsx — Gauge-style turn indicator
 // ============================================================
 
 import React from "react";
@@ -19,8 +19,8 @@ const TurnIndicator: React.FC<TurnIndicatorProps> = ({
 }) => {
   if (winner) {
     return (
-      <div className="turn-indicator bg-yellow-700 text-white">
-        🏆 Game Over
+      <div className="turn-indicator game-over">
+        ⚓ BATTLE CONCLUDED
       </div>
     );
   }
@@ -28,8 +28,8 @@ const TurnIndicator: React.FC<TurnIndicatorProps> = ({
   return (
     <div className={`turn-indicator ${isMyTurn ? "my-turn" : "opponent-turn"}`}>
       {isMyTurn
-        ? "🎯 Your Turn — Shoot!"
-        : `⏳ ${opponentName ?? "Opponent"}'s Turn`}
+        ? `◉ FIRE — YOUR TURN`
+        : `◌ ${opponentName ?? "ENEMY"} TURN`}
     </div>
   );
 };

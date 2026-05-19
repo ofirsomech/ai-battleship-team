@@ -1,5 +1,5 @@
 // ============================================================
-// Toast.tsx — Dumb notification toast (no hooks)
+// Toast.tsx — Notification toast with naval theme (no hooks)
 // Variants: error | success | info
 // ============================================================
 
@@ -17,9 +17,9 @@ interface ToastProps {
 }
 
 const variantClasses: Record<string, string> = {
-  error: "bg-red-900 border-red-600 text-red-200",
-  success: "bg-green-900 border-green-600 text-green-200",
-  info: "bg-blue-900 border-blue-600 text-blue-200",
+  error: "toast-error",
+  success: "toast-success",
+  info: "toast-info",
 };
 
 const Toast: React.FC<ToastProps> = ({
@@ -32,7 +32,7 @@ const Toast: React.FC<ToastProps> = ({
 
   return (
     <div
-      className={`fixed top-4 right-4 z-40 max-w-sm rounded-lg border px-4 py-3 shadow-lg transition-all duration-300 ${variantClasses[variant]}`}
+      className={`fixed top-4 right-4 z-40 max-w-sm border px-4 py-3 shadow-lg transition-all duration-300 font-['Crimson_Text'] ${variantClasses[variant]}`}
     >
       <div className="flex items-start gap-3">
         <span className="text-sm flex-1">{message}</span>
