@@ -74,6 +74,6 @@ def _random_fallback(data: dict) -> str:
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("AI_SERVICE_PORT", 5000))
+    port = int(os.environ.get("AI_SERVICE_PORT", 5005))
     print(f"AI Battleship Service starting on port {port}")
     app.run(host="0.0.0.0", port=port, debug=False)

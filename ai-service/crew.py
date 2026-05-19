@@ -5,14 +5,19 @@ Uses deepseek/deepseek-v4-pro via OpenRouter.
 """
 import os
 import json
-from crewai import Agent, Task, Crew, Process
+from crewai import Agent, Task, Crew, Process, LLM
 
 
 class BattleshipAgent:
     def __init__(self):
         api_key = os.environ.get("OPENROUTER_API_KEY", "")
-        self.model = os.environ.get("AI_MODEL", "deepseek/deepseek-v4-pro")
-        self.base_url = "https://openrouter.ai/api/v1"
+        model = os.environ.get("AI_MODEL", "openrouter/deepseek/deepseek-v4-pro")
+
+        self.llm = LLM(
+            model=model,
+            base_url="https://openrouter.ai/api/v1",
+            api_key=api_key,
+        )
 
     def decide(self, game_state: dict) -> str:
         """
@@ -45,6 +50,7 @@ class BattleshipAgent:
             ),
             allow_delegation=False,
             verbose=False,
+            llm=self.llm,
         )
 
         task = Task(
