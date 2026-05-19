@@ -224,6 +224,17 @@ const App: React.FC = () => {
     dispatch({ type: "SET_ERROR", error: null });
   }, []);
 
+  const handleCreateAIGame = useCallback(() => {
+    const socket = socketRef.current;
+    if (!socket) return;
+
+    dispatch({ type: "SET_GAME_MODE", gameMode: "ai" });
+
+    (socket as unknown as { emit: (event: string, ...args: unknown[]) => void }).emit(
+      "createAIGame"
+    );
+  }, []);
+
   // ---- Manual reconnect for testing AC-12 ---------------------
   const handleReconnect = useCallback(() => {
     const socket = socketRef.current;
@@ -276,6 +287,7 @@ const App: React.FC = () => {
             socketRef.current?.emit("joinRoom", { roomCode, playerName });
           }}
           onClearError={handleClearError}
+          onCreateAIGame={handleCreateAIGame}
         />
       )}
 

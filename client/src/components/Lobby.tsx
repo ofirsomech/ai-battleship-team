@@ -13,6 +13,7 @@ interface LobbyProps {
   onRoomCreated: (roomCode: string) => void;
   onJoined: (roomCode: string, playerName: string) => void;
   onClearError: () => void;
+  onCreateAIGame: () => void;
 }
 
 const Lobby: React.FC<LobbyProps> = ({
@@ -23,6 +24,7 @@ const Lobby: React.FC<LobbyProps> = ({
   onRoomCreated,
   onJoined,
   onClearError,
+  onCreateAIGame,
 }) => {
   const [joinCode, setJoinCode] = useState("");
   const [playerName, setPlayerName] = useState("Player 2");
@@ -31,6 +33,11 @@ const Lobby: React.FC<LobbyProps> = ({
   const handleCreateRoom = () => {
     onClearError();
     socket.emit("createRoom");
+  };
+
+  const handleCreateAIGame = () => {
+    onClearError();
+    onCreateAIGame();
   };
 
   const handleJoinRoom = () => {
@@ -104,6 +111,20 @@ const Lobby: React.FC<LobbyProps> = ({
             onClick={handleCreateRoom}
           >
             CREATE ROOM
+          </button>
+
+          {/* Play vs AI */}
+          <button
+            className="btn w-full text-lg py-3"
+            style={{
+              background: "linear-gradient(135deg, rgba(57,255,20,0.08), rgba(57,255,20,0.15))",
+              borderColor: "var(--color-radar-green)",
+              color: "var(--color-radar-green)",
+              textShadow: "0 0 8px rgba(57,255,20,0.4)",
+            }}
+            onClick={handleCreateAIGame}
+          >
+            🤖 PLAY VS AI
           </button>
 
           {/* Divider */}

@@ -4,6 +4,7 @@
 
 import type {
   GamePhase,
+  GameMode,
   Board,
   Ship,
   ShipPlacement,
@@ -17,6 +18,7 @@ import type {
 
 export interface AppState {
   phase: GamePhase;
+  gameMode: GameMode;
   roomCode: string | null;
   playerId: string | null;
   playerName: string | null;
@@ -50,6 +52,7 @@ export function createEmptyBoard(): Board {
 export function initialState(): AppState {
   return {
     phase: "lobby",
+    gameMode: "multiplayer",
     roomCode: null,
     playerId: null,
     playerName: null,
@@ -73,6 +76,7 @@ export function initialState(): AppState {
 export type AppAction =
   | { type: "SET_CONNECTED"; isConnected: boolean }
   | { type: "SET_PLAYER_ID"; playerId: string }
+  | { type: "SET_GAME_MODE"; gameMode: GameMode }
   | { type: "ROOM_CREATED"; roomCode: string }
   | { type: "PLAYER_JOINED"; playerId: string; playerName: string }
   | { type: "SET_PHASE"; phase: GamePhase }
@@ -103,6 +107,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
 
     case "SET_PLAYER_ID":
       return { ...state, playerId: action.playerId };
+
+    case "SET_GAME_MODE":
+      return { ...state, gameMode: action.gameMode };
 
     case "ROOM_CREATED":
       return {
