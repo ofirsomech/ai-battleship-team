@@ -248,6 +248,8 @@ const App: React.FC = () => {
   return (
     <div
       className="min-h-screen"
+      data-phase={phase}
+      data-winner={state.winner || ""}
       style={{ backgroundColor: "var(--color-navy-deep)", color: "var(--color-warm-gray-bright)" }}
     >
       {/* Connection status bar */}
@@ -304,7 +306,7 @@ const App: React.FC = () => {
       )}
 
       {/* Game Over Modal */}
-      {phase === "gameOver" && (
+      {(phase === "gameOver" || !!state.winner) && (
         <GameOverModal
           winner={state.winner!}
           myPlayerId={state.playerId}
