@@ -373,7 +373,9 @@ export function registerHandlers(io: TypedServer): void {
         // Add human as first player
         let updated = addPlayerToGameState(state, humanPlayerId, humanPlayerName);
 
-        // Build AI player with auto-randomized board and auto-ready
+        // Build AI player with auto-randomized board but NOT auto-ready.
+        // The human must place ships first, then click Ready. AI auto-readies
+        // only after the human is ready (in the playerReady handler).
         const aiPlacements = randomLayout();
         const aiBoard = applyShipsToBoard(createEmptyBoard(), aiPlacements);
         const aiShips = shipsFromPlacements(aiPlacements);
@@ -384,14 +386,12 @@ export function registerHandlers(io: TypedServer): void {
           board: aiBoard,
           trackingBoard: createEmptyBoard(),
           ships: aiShips,
-          isReady: true,
+          isReady: false,
         };
 
         updated = {
           ...updated,
           players: [...updated.players, aiPlayer],
-          phase: "battle",
-          currentTurn: humanPlayerId, // human shoots first (§5)
         };
 
         setRoom(roomCode, updated);
@@ -401,7 +401,7 @@ export function registerHandlers(io: TypedServer): void {
         registerPlayer(socket.id, roomCode, humanPlayerId);
         void socket.join(roomCode);
 
-        // Emit contract events in order
+        // Emit contract events — placement phase starts; no battleStart yet
         socket.emit("roomCreated", { roomCode, reconnectToken } as unknown as {
           roomCode: string;
         });
@@ -411,10 +411,6 @@ export function registerHandlers(io: TypedServer): void {
           playerName: aiPlayerName,
           reconnectToken,
         } as unknown as { playerId: string; playerName: string });
-
-        socket.emit("opponentReady");
-
-        socket.emit("battleStart", { currentTurn: humanPlayerId });
 
         logger.info(
           "AI_GAME_CREATED",
@@ -736,14 +732,23 @@ export function registerHandlers(io: TypedServer): void {
         }
 
         // Mark player ready
-        const updatedPlayers = state.players.map((p) =>
+        let updatedPlayers = state.players.map((p) =>
           p.id === playerId ? { ...p, isReady: true } : p
         );
 
+        // AI mode: auto-ready the AI player as soon as the human is ready
+        if (state.gameMode === "ai") {
+          updatedPlayers = updatedPlayers.map((p) =>
+            p.id.startsWith("ai-") ? { ...p, isReady: true } : p
+          );
+        }
+
         let updatedState = { ...state, players: updatedPlayers };
 
-        // Notify opponent
-        socket.broadcast.to(roomCode).emit("opponentReady");
+        // Notify opponent (multiplayer only — AI has no socket)
+        if (state.gameMode !== "ai") {
+          socket.broadcast.to(roomCode).emit("opponentReady");
+        }
 
         // Check if both ready → start battle
         const bothReady = updatedPlayers.every((p) => p.isReady);

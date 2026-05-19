@@ -110,15 +110,7 @@ export function addPlayerToGameState(
 
   const players = [...state.players, newPlayer];
 
-  // AI games skip placement — the AI is auto‑ready, so we go
-  // straight to battle once both "players" are present.
-  const isAIGame = state.gameMode === "ai";
-  const phase: GamePhase =
-    players.length === 2
-      ? isAIGame
-        ? "battle"
-        : "placement"
-      : "lobby";
+  const phase: GamePhase = players.length === 2 ? "placement" : "lobby";
 
   return { ...state, players, phase };
 }
