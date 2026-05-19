@@ -205,6 +205,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleShoot = useCallback((col: ColIndex, row: RowIndex) => {
+    dispatch({ type: "SET_AI_THINKING", thinking: null });
     socketRef.current?.emit("shoot", { coordinate: { col, row } });
   }, []);
 

@@ -214,7 +214,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         currentTurn: nextTurn,
         winner: winner || null,
         phase: winner ? "gameOver" : state.phase,
-        aiLastThinking: isMyTurnNow ? null : state.aiLastThinking,
       };
     }
 
