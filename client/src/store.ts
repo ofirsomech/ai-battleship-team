@@ -205,6 +205,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         }
       }
 
+      const isMyTurnNow = nextTurn === state.playerId;
+
       return {
         ...state,
         ownBoard: newOwnBoard,
@@ -212,7 +214,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         currentTurn: nextTurn,
         winner: winner || null,
         phase: winner ? "gameOver" : state.phase,
-        aiLastThinking: null,
+        aiLastThinking: isMyTurnNow ? null : state.aiLastThinking,
       };
     }
 
