@@ -14,7 +14,7 @@ import { logger } from "./logging.js";
 const MAX_ROOMS = 100;
 
 /** Maximum connections per IP (F-008). */
-const MAX_CONNS_PER_IP = 5;
+const MAX_CONNS_PER_IP = 50;
 
 /** Room idle timeout before cleanup sweep removes it (ms) (F-007). */
 const ROOM_IDLE_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
