@@ -11,7 +11,7 @@ from crewai import Agent, Task, Crew, Process, LLM
 class BattleshipAgent:
     def __init__(self):
         api_key = os.environ.get("OPENROUTER_API_KEY", "")
-        model = os.environ.get("AI_MODEL", "openrouter/deepseek/deepseek-v4-pro")
+        model = os.environ.get("AI_MODEL", "openrouter/deepseek/deepseek-v4-flash")
 
         self.llm = LLM(
             model=model,
@@ -19,9 +19,10 @@ class BattleshipAgent:
             api_key=api_key,
         )
 
-    def decide(self, game_state: dict) -> str:
+    def decide(self, game_state: dict) -> dict:
         """
-        Analyze game state and return optimal coordinate.
+        Analyze game state and return optimal coordinate with reasoning.
+        Returns {"coordinate": "a5", "thinking": "..."}
         Falls back to hunt-and-target if CrewAI fails.
         """
         try:
@@ -29,8 +30,9 @@ class BattleshipAgent:
         except Exception:
             return self._fallback_decide(game_state)
 
-    def _crew_decide(self, game_state: dict) -> str:
-        """Use CrewAI to analyze board and decide next shot."""
+    def _crew_decide(self, game_state: dict) -> dict:
+        """Use CrewAI to analyze board and decide next shot.
+        Returns {"coordinate": "a5", "thinking": "..."}"""
         tracking = game_state.get("trackingBoard", {})
         grid = tracking.get("grid", [])
         ships = game_state.get("ships", [])
@@ -76,7 +78,16 @@ class BattleshipAgent:
         )
 
         result = crew.kickoff()
-        return self._parse_coordinate(str(result))
+        coordinate = self._parse_coordinate(str(result))
+
+        # Extract reasoning from the CrewAI result
+        thinking = ""
+        if hasattr(result, 'tasks_output') and result.tasks_output:
+            thinking = str(result.tasks_output[0]) if result.tasks_output else ""
+        if not thinking:
+            thinking = "Analyzing board patterns for optimal targeting..."
+
+        return {"coordinate": coordinate, "thinking": thinking}
 
     def _parse_coordinate(self, output: str) -> str:
         """Parse CrewAI output into a-j, 1-10 coordinate."""
@@ -96,8 +107,9 @@ class BattleshipAgent:
         # Fallback to extracting first letter+number
         return self._fallback_decide({})
 
-    def _fallback_decide(self, game_state: dict) -> str:
-        """Hunt-and-target strategy without LLM."""
+    def _fallback_decide(self, game_state: dict) -> dict:
+        """Hunt-and-target strategy without LLM.
+        Returns {"coordinate": "a5", "thinking": "..."}"""
         import random
         tracking = game_state.get("trackingBoard", {})
         grid = tracking.get("grid", [])
@@ -121,7 +133,10 @@ class BattleshipAgent:
                         candidates.add(f"{col_letter}{nr + 1}")
 
         if candidates:
-            return random.choice(list(candidates))
+            return {
+                "coordinate": random.choice(list(candidates)),
+                "thinking": "Targeting adjacent cells near previous hits (hunt-and-target strategy).",
+            }
 
         # Priority 2: Checkerboard pattern
         all_valid = []
@@ -135,7 +150,10 @@ class BattleshipAgent:
                         all_valid.append(f"{col_letter}{row_idx + 1}")
 
         if all_valid:
-            return random.choice(all_valid)
+            return {
+                "coordinate": random.choice(all_valid),
+                "thinking": "Using checkerboard parity pattern to maximize board coverage.",
+            }
 
         # Fallback: any valid cell
         for row_idx, row in enumerate(grid):
@@ -143,9 +161,15 @@ class BattleshipAgent:
                 status = cell.get("status", "empty") if isinstance(cell, dict) else "empty"
                 if status not in ("hit", "miss", "sunk"):
                     col_letter = chr(ord("a") + col_idx)
-                    return f"{col_letter}{row_idx + 1}"
+                    return {
+                        "coordinate": f"{col_letter}{row_idx + 1}",
+                        "thinking": "Scanning remaining cells for any valid target.",
+                    }
 
-        return "a1"
+        return {
+            "coordinate": "a1",
+            "thinking": "No optimal targets remain — selecting last available cell.",
+        }
 
     def _format_board(self, grid: list) -> str:
         """Format tracking board as human-readable text."""

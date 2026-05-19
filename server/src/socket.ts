@@ -858,8 +858,14 @@ export function registerHandlers(io: TypedServer): void {
           const aiPlayerId = newState.currentTurn;
 
           processAITurn(newState, aiPlayerId)
-            .then(({ newState: aiNewState, result: aiResult }) => {
+            .then(({ newState: aiNewState, result: aiResult, thinking }) => {
               setRoom(roomCode, aiNewState);
+
+              // Emit AI thinking before the shot result so the UI can display reasoning
+              io.to(roomCode).emit("aiThinking", {
+                thinking,
+                coordinate: aiResult.coordinate,
+              });
 
               io.to(roomCode).emit("shotResult", aiResult);
 

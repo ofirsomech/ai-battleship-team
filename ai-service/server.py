@@ -43,8 +43,8 @@ def decide():
 
     try:
         agent = get_agent()
-        coordinate = agent.decide(data)
-        return jsonify({"coordinate": coordinate})
+        result = agent.decide(data)
+        return jsonify(result)
     except Exception as e:
         # Log error and fall back to random valid coordinate
         print(f"[AI-ERROR] {e}", file=sys.stderr)
@@ -52,7 +52,11 @@ def decide():
 
         # Calculate a random valid coordinate from tracking board
         coordinate = _random_fallback(data)
-        return jsonify({"coordinate": coordinate, "fallback": True})
+        return jsonify({
+            "coordinate": coordinate,
+            "thinking": "AI service encountered an error — using random targeting.",
+            "fallback": True,
+        })
 
 
 def _random_fallback(data: dict) -> str:

@@ -9,6 +9,12 @@ import { logger } from "./logging.js";
 
 // ---- Types ----------------------------------------------------
 
+/** Returned by `getAIDecision` — coordinate plus AI reasoning. */
+export interface AIDecision {
+  coordinate: Coordinate;
+  thinking: string;
+}
+
 /** Payload sent to the AI decision service. */
 interface AIDecisionPayload {
   myBoard: Board;
@@ -20,28 +26,51 @@ interface AIDecisionPayload {
   }[];
 }
 
-// ---- Validation -----------------------------------------------
+// ---- Parsing --------------------------------------------------
+
+/** Default thinking message used when AI reasoning is unavailable. */
+const DEFAULT_THINKING = "Analyzing board patterns for optimal targeting...";
 
 /**
- * Validate that an unknown value is a legal Coordinate AND the cell
- * has not already been shot on the AI's tracking board.
+ * Parse the Python AI service response into an AIDecision.
+ * Expects `{ coordinate: "a5", thinking: "..." }`.
+ * Validates that the parsed coordinate is in-bounds and not already shot.
  */
-function isValidAIResponse(
-  coord: unknown,
+function parseAIDecisionResponse(
+  data: unknown,
   trackingBoard: Board
-): coord is Coordinate {
-  if (!coord || typeof coord !== "object") return false;
-  const c = coord as Record<string, unknown>;
-  if (typeof c.col !== "number" || c.col < 0 || c.col > 9) return false;
-  if (typeof c.row !== "number" || c.row < 0 || c.row > 9) return false;
+): AIDecision | null {
+  if (!data || typeof data !== "object") return null;
+  const d = data as Record<string, unknown>;
+
+  const coordStr = typeof d.coordinate === "string" ? d.coordinate.trim().toLowerCase() : "";
+  const thinking = typeof d.thinking === "string" && d.thinking.length > 0
+    ? d.thinking
+    : DEFAULT_THINKING;
+
+  // Parse coordinate string "a5" → { col: 0, row: 4 }
+  if (coordStr.length < 2 || coordStr.length > 3) return null;
+  const colLetter = coordStr.charAt(0);
+  const rowStr = coordStr.slice(1);
+  if (colLetter < "a" || colLetter > "j") return null;
+
+  const col = colLetter.charCodeAt(0) - 97; // 'a' → 0, 'j' → 9
+  const row = parseInt(rowStr, 10);
+  if (isNaN(row) || row < 1 || row > 10) return null;
+
+  const rowIndex = row - 1;
 
   // Must NOT be a cell already shot
-  const cell = trackingBoard.grid[c.row][c.col];
-  return (
-    cell.status !== "hit" &&
-    cell.status !== "miss" &&
-    cell.status !== "sunk"
-  );
+  const cell = trackingBoard.grid[rowIndex]?.[col];
+  if (!cell) return null;
+  if (cell.status === "hit" || cell.status === "miss" || cell.status === "sunk") {
+    return null;
+  }
+
+  return {
+    coordinate: { col: col as ColIndex, row: rowIndex as RowIndex },
+    thinking,
+  };
 }
 
 // ---- Fallback -------------------------------------------------
@@ -79,7 +108,10 @@ function getRandomUnshotCell(trackingBoard: Board): Coordinate {
  * Request a move decision from the external AI service.
  *
  * POSTs the AI player's perspective (own board, tracking board, ships)
- * to the Python AI service at `http://localhost:5000/api/decide`.
+ * to the Python AI service. URL configured via `AI_SERVICE_URL` env var
+ * (defaults to `http://localhost:5002/api/decide`).
+ *
+ * The Python service returns `{ coordinate: "a5", thinking: "..." }`.
  *
  * Falls back to a random un-shot cell if:
  * - The service is unreachable
@@ -90,7 +122,7 @@ function getRandomUnshotCell(trackingBoard: Board): Coordinate {
 export async function getAIDecision(
   gameState: GameState,
   aiPlayerId: string
-): Promise<Coordinate> {
+): Promise<AIDecision> {
   const aiPlayer = gameState.players.find((p) => p.id === aiPlayerId);
   if (!aiPlayer) {
     throw new Error(`AI player ${aiPlayerId} not found in game state`);
@@ -110,7 +142,8 @@ export async function getAIDecision(
   const timeoutId = setTimeout(() => controller.abort(), AI_DECISION_TIMEOUT_MS);
 
   try {
-    const response = await fetch("http://localhost:5000/api/decide", {
+    const aiServiceUrl = process.env.AI_SERVICE_URL || "http://localhost:5005/api/decide";
+    const response = await fetch(aiServiceUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -124,16 +157,17 @@ export async function getAIDecision(
 
     const data: unknown = await response.json();
 
-    if (!isValidAIResponse(data, aiPlayer.trackingBoard)) {
+    const decision = parseAIDecisionResponse(data, aiPlayer.trackingBoard);
+    if (!decision) {
       throw new Error("AI returned invalid or already-shot coordinate");
     }
 
     logger.info("AI_DECISION", "AI service returned valid coordinate", {
       aiPlayerId,
-      coordinate: data,
+      coordinate: decision.coordinate,
     });
 
-    return data;
+    return decision;
   } catch (err: unknown) {
     clearTimeout(timeoutId);
 
@@ -150,6 +184,9 @@ export async function getAIDecision(
       { aiPlayerId, reason }
     );
 
-    return getRandomUnshotCell(aiPlayer.trackingBoard);
+    return {
+      coordinate: getRandomUnshotCell(aiPlayer.trackingBoard),
+      thinking: `AI service unavailable (${reason}) — using random targeting.`,
+    };
   }
 }

@@ -182,6 +182,9 @@ export interface ServerToClientEvents {
   /** Result of a shot, broadcast to both players. */
   shotResult: (data: ShotResultPayload) => void;
 
+  /** AI reasoning before its shot is processed (AI mode only). */
+  aiThinking: (data: { thinking: string; coordinate: Coordinate }) => void;
+
   /** The game has ended. */
   gameOver: (data: GameOverPayload) => void;
 
