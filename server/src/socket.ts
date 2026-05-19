@@ -5,7 +5,8 @@
 // Security hardening: F-001, F-002, F-003, F-005, F-010, F-011, F-016
 // ============================================================
 
-import type { Server as SocketIOServer, Socket } from "socket.io";
+import { Socket } from "socket.io";
+import type { Server as SocketIOServer } from "socket.io";
 import type {
   ClientToServerEvents,
   ServerToClientEvents,
@@ -53,6 +54,7 @@ import {
   hasConnectedPlayers,
   getRoomCount,
 } from "./rooms.js";
+import { processAITurn } from "./ai.js";
 import { logger } from "./logging.js";
 
 // ---- Types ----------------------------------------------------
@@ -335,6 +337,99 @@ export function registerHandlers(io: TypedServer): void {
         const msg = err instanceof Error ? err.message : "Failed to create room";
         socket.emit("error", { message: msg, code: "CREATE_ROOM_FAILED" });
         logger.error("CREATE_ROOM_FAILED", msg, {
+          socketId: socket.id,
+          error: err instanceof Error ? err.stack : String(err),
+        });
+      }
+    });
+
+    // ==========================================================
+    // 2A. createAIGame — single-player vs AI
+    // ==========================================================
+    // Uses the untyped Socket cast because createAIGame is a new
+    // internal event not yet defined in the shared contract types.
+    (socket as Socket).on("createAIGame", () => {
+      try {
+        // Rate limit (F-001) — reuse createRoom window
+        if (!checkRateLimit(socket.id, "createRoom")) {
+          socket.emit("error", {
+            message: "Too many requests — please slow down",
+            code: "RATE_LIMITED",
+          });
+          return;
+        }
+
+        const roomCode = generateRoomCode();
+        const state = createRoom(roomCode, "ai");
+        const humanPlayerId = socket.id;
+        const humanPlayerName = "Player 1";
+        const aiPlayerId = `ai-${roomCode}`;
+        const aiPlayerName = "AI Commander";
+
+        // Generate reconnect token for the human player (F-005)
+        const reconnectToken = generateReconnectToken();
+        storeReconnectToken(humanPlayerId, reconnectToken);
+
+        // Add human as first player
+        let updated = addPlayerToGameState(state, humanPlayerId, humanPlayerName);
+
+        // Build AI player with auto-randomized board and auto-ready
+        const aiPlacements = randomLayout();
+        const aiBoard = applyShipsToBoard(createEmptyBoard(), aiPlacements);
+        const aiShips = shipsFromPlacements(aiPlacements);
+
+        const aiPlayer: Player = {
+          id: aiPlayerId,
+          name: aiPlayerName,
+          board: aiBoard,
+          trackingBoard: createEmptyBoard(),
+          ships: aiShips,
+          isReady: true,
+        };
+
+        updated = {
+          ...updated,
+          players: [...updated.players, aiPlayer],
+          phase: "battle",
+          currentTurn: humanPlayerId, // human shoots first (§5)
+        };
+
+        setRoom(roomCode, updated);
+
+        // Track socket → player
+        socket.data = { roomCode, playerId: humanPlayerId };
+        registerPlayer(socket.id, roomCode, humanPlayerId);
+        void socket.join(roomCode);
+
+        // Emit contract events in order
+        socket.emit("roomCreated", { roomCode, reconnectToken } as unknown as {
+          roomCode: string;
+        });
+
+        socket.emit("playerJoined", {
+          playerId: aiPlayerId,
+          playerName: aiPlayerName,
+          reconnectToken,
+        } as unknown as { playerId: string; playerName: string });
+
+        socket.emit("opponentReady");
+
+        socket.emit("battleStart", { currentTurn: humanPlayerId });
+
+        logger.info(
+          "AI_GAME_CREATED",
+          `AI game created in room ${roomCode} — human: ${humanPlayerId}, AI: ${aiPlayerId}`,
+          {
+            roomCode,
+            humanPlayerId,
+            aiPlayerId,
+            totalRooms: getRoomCount(),
+          }
+        );
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : "Failed to create AI game";
+        socket.emit("error", { message: msg, code: "CREATE_AI_GAME_FAILED" });
+        logger.error("CREATE_AI_GAME_FAILED", msg, {
           socketId: socket.id,
           error: err instanceof Error ? err.stack : String(err),
         });
@@ -747,6 +842,56 @@ export function registerHandlers(io: TypedServer): void {
             { roomCode, winner: newState.winner, reason: "allSunk" }
           );
         }
+
+        // AI mode: if it's now the AI's turn, process it asynchronously
+        if (
+          newState.gameMode === "ai" &&
+          newState.phase === "battle" &&
+          newState.currentTurn?.startsWith("ai-")
+        ) {
+          const aiPlayerId = newState.currentTurn;
+
+          processAITurn(newState, aiPlayerId)
+            .then(({ newState: aiNewState, result: aiResult }) => {
+              setRoom(roomCode, aiNewState);
+
+              io.to(roomCode).emit("shotResult", aiResult);
+
+              logger.info(
+                "AI_SHOT_FIRED",
+                `AI ${aiPlayerId} shot at (${aiResult.coordinate.col},${aiResult.coordinate.row}): ${aiResult.result}`,
+                {
+                  roomCode,
+                  aiPlayerId,
+                  coordinate: aiResult.coordinate,
+                  result: aiResult.result,
+                  sunkShip: aiResult.sunkShip ?? null,
+                }
+              );
+
+              if (aiNewState.phase === "gameOver") {
+                io.to(roomCode).emit("gameOver", {
+                  winner: aiNewState.winner!,
+                  reason: "allSunk",
+                });
+
+                logger.info(
+                  "AI_GAME_OVER",
+                  `AI game over in room ${roomCode} — winner: ${aiNewState.winner}`,
+                  { roomCode, winner: aiNewState.winner, reason: "allSunk" }
+                );
+              }
+            })
+            .catch((err: unknown) => {
+              const msg =
+                err instanceof Error ? err.message : "AI turn failed";
+              logger.error("AI_TURN_FAILED", msg, {
+                roomCode,
+                aiPlayerId,
+                error: err instanceof Error ? err.stack : String(err),
+              });
+            });
+        }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Shot failed";
         socket.emit("error", { message: msg, code: "SHOT_FAILED" });
@@ -895,6 +1040,59 @@ export function registerHandlers(io: TypedServer): void {
           return;
         }
 
+        // ---- AI mode: immediate reset -----------------------------
+        if (state.gameMode === "ai") {
+          const aiPlayerId = state.players.find((p) =>
+            p.id.startsWith("ai-")
+          )?.id;
+
+          // Reset AI board to random layout, auto-ready
+          const aiPlacements = randomLayout();
+          const aiBoard = applyShipsToBoard(createEmptyBoard(), aiPlacements);
+          const aiShips = shipsFromPlacements(aiPlacements);
+
+          const freshPlayers: Player[] = state.players.map((p) => {
+            if (p.id === aiPlayerId) {
+              return {
+                ...p,
+                board: aiBoard,
+                trackingBoard: createEmptyBoard(),
+                ships: aiShips,
+                isReady: true,
+              };
+            }
+            // Human player — reset to empty, not ready
+            return {
+              ...p,
+              board: createEmptyBoard(),
+              trackingBoard: createEmptyBoard(),
+              ships: [],
+              isReady: false,
+            };
+          });
+
+          const newState = {
+            ...state,
+            players: freshPlayers,
+            phase: "placement" as const,
+            currentTurn: null,
+            winner: null,
+          };
+
+          setRoom(roomCode, newState);
+
+          // Acknowledge success
+          if (ack) ack({ success: true });
+
+          logger.info(
+            "AI_REMATCH_STARTED",
+            `AI rematch started in room ${roomCode}`,
+            { roomCode }
+          );
+          return;
+        }
+
+        // ---- Multiplayer: opt-in flow ----------------------------
         // Store callback if provided
         if (ack) {
           storePlayAgainCallback(roomCode, playerId, ack);

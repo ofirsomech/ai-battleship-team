@@ -4,7 +4,7 @@
 // ============================================================
 
 import { randomBytes } from "node:crypto";
-import { GameState } from "@battleship/shared";
+import { GameState, GameMode } from "@battleship/shared";
 import { createGameState } from "./domain/match.js";
 import { logger } from "./logging.js";
 
@@ -87,11 +87,11 @@ export function generateRoomCode(): string {
 
 // ---- Room CRUD ------------------------------------------------
 
-export function createRoom(roomCode: string): GameState {
+export function createRoom(roomCode: string, gameMode?: GameMode): GameState {
   if (rooms.size >= MAX_ROOMS) {
     throw new Error("Server at capacity — too many active rooms");
   }
-  const state = createGameState(roomCode);
+  const state = createGameState(roomCode, gameMode);
   rooms.set(roomCode, state);
   roomLastActivity.set(roomCode, Date.now());
   return state;

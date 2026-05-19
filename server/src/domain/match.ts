@@ -15,6 +15,7 @@ import {
   Orientation,
   GameState,
   GamePhase,
+  GameMode,
   Player,
   ShotResultType,
   ShotResultPayload,
@@ -62,12 +63,19 @@ function isShipSunk(board: Board, shipType: ShipType): boolean {
 
 /**
  * Create a fresh GameState in the "lobby" phase with zero players.
+ *
+ * @param gameMode — defaults to `"multiplayer"`. Set to `"ai"` for
+ *   single‑player vs‑AI games.
  */
-export function createGameState(roomCode: string): GameState {
+export function createGameState(
+  roomCode: string,
+  gameMode: GameMode = "multiplayer"
+): GameState {
   return {
     roomCode,
     players: [],
     phase: "lobby",
+    gameMode,
     currentTurn: null,
     winner: null,
   };
@@ -101,7 +109,16 @@ export function addPlayerToGameState(
   };
 
   const players = [...state.players, newPlayer];
-  const phase: GamePhase = players.length === 2 ? "placement" : "lobby";
+
+  // AI games skip placement — the AI is auto‑ready, so we go
+  // straight to battle once both "players" are present.
+  const isAIGame = state.gameMode === "ai";
+  const phase: GamePhase =
+    players.length === 2
+      ? isAIGame
+        ? "battle"
+        : "placement"
+      : "lobby";
 
   return { ...state, players, phase };
 }
