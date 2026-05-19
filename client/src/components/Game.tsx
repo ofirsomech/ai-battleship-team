@@ -3,9 +3,10 @@
 // ============================================================
 
 import React, { useCallback } from "react";
-import type { Board as BoardType, ColIndex, RowIndex } from "@battleship/shared";
+import type { Board as BoardType, ColIndex, RowIndex, GameMode } from "@battleship/shared";
 import Board from "./Board";
 import TurnIndicator from "./TurnIndicator";
+import AIThinkingPanel from "./AIThinkingPanel";
 
 interface GameProps {
   ownBoard: BoardType;
@@ -15,6 +16,8 @@ interface GameProps {
   playerName: string | null;
   opponentName: string | null;
   winner: string | null;
+  gameMode: GameMode;
+  aiLastThinking: string | null;
   onShoot: (col: ColIndex, row: RowIndex) => void;
   error: string | null;
 }
@@ -27,6 +30,8 @@ const Game: React.FC<GameProps> = ({
   playerName,
   opponentName,
   winner,
+  gameMode,
+  aiLastThinking,
   onShoot,
   error,
 }) => {
@@ -64,6 +69,11 @@ const Game: React.FC<GameProps> = ({
         opponentName={opponentName}
         winner={winner}
       />
+
+      {/* AI Thinking Panel */}
+      {gameMode === "ai" && aiLastThinking !== null && (
+        <AIThinkingPanel thinking={aiLastThinking} />
+      )}
 
       {/* Player labels */}
       <div className="flex gap-16 text-sm">

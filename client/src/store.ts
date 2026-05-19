@@ -35,6 +35,8 @@ export interface AppState {
   /** In placement: the ship type currently being dragged/placed */
   placingShipType: string | null;
   placingOrientation: "horizontal" | "vertical";
+  /** Latest AI thinking text (null when cleared on human turn) */
+  aiLastThinking: string | null;
 }
 
 /** Create a fresh 10×10 empty board grid */
@@ -68,6 +70,7 @@ export function initialState(): AppState {
     notice: null,
     placingShipType: null,
     placingOrientation: "horizontal",
+    aiLastThinking: null,
   };
 }
 
@@ -96,6 +99,7 @@ export type AppAction =
   | { type: "SET_PLACING_ORIENTATION"; orientation: "horizontal" | "vertical" }
   | { type: "UPDATE_CELL"; board: "own" | "tracking"; row: RowIndex; col: ColIndex; status: CellStatus; shipType?: string }
   | { type: "RESET_FOR_NEW_GAME" }
+  | { type: "SET_AI_THINKING"; thinking: string | null }
   | { type: "REBUILD_FROM_STATE"; gameState: import("@battleship/shared").GameState; myPlayerId: string };
 
 // ---- Reducer ---------------------------------------------------
@@ -168,6 +172,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         error: null,
       };
 
+    case "SET_AI_THINKING":
+      return { ...state, aiLastThinking: action.thinking };
+
     case "SHOT_RESULT": {
       const { coordinate, result, sunkShip, nextTurn, winner } = action;
       const { col, row } = coordinate;
@@ -205,6 +212,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         currentTurn: nextTurn,
         winner: winner || null,
         phase: winner ? "gameOver" : state.phase,
+        aiLastThinking: null,
       };
     }
 
@@ -288,6 +296,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
         notice: null,
         placingShipType: null,
         placingOrientation: "horizontal",
+        aiLastThinking: null,
       };
 
     case "REBUILD_FROM_STATE": {

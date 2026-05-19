@@ -156,6 +156,12 @@ const App: React.FC = () => {
       }
     });
 
+    // ---- aiThinking -------------------------------------------
+    socket.on("aiThinking", (data) => {
+      if (!mountedRef.current) return;
+      dispatch({ type: "SET_AI_THINKING", thinking: data.thinking });
+    });
+
     // ---- Connect ----------------------------------------------
     socket.connect();
 
@@ -314,6 +320,8 @@ const App: React.FC = () => {
           playerName={state.playerName}
           opponentName={state.opponentName}
           winner={state.winner}
+          gameMode={state.gameMode}
+          aiLastThinking={state.aiLastThinking}
           onShoot={handleShoot}
           error={state.error}
         />
